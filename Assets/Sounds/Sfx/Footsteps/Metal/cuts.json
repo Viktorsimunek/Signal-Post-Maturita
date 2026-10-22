@@ -1,0 +1,163 @@
+[
+  {
+    "index": 1,
+    "file": "footstep_001.wav",
+    "start_ms": 103.74,
+    "end_ms": 680.43,
+    "duration_ms": 576.69
+  },
+  {
+    "index": 2,
+    "file": "footstep_002.wav",
+    "start_ms": 674.44,
+    "end_ms": 1263.11,
+    "duration_ms": 588.66
+  },
+  {
+    "index": 3,
+    "file": "footstep_003.wav",
+    "start_ms": 1257.12,
+    "end_ms": 1885.69,
+    "duration_ms": 628.57
+  },
+  {
+    "index": 4,
+    "file": "footstep_004.wav",
+    "start_ms": 1879.71,
+    "end_ms": 2496.3,
+    "duration_ms": 616.6
+  },
+  {
+    "index": 5,
+    "file": "footstep_005.wav",
+    "start_ms": 2490.32,
+    "end_ms": 3130.86,
+    "duration_ms": 640.54
+  },
+  {
+    "index": 6,
+    "file": "footstep_006.wav",
+    "start_ms": 3124.88,
+    "end_ms": 3741.47,
+    "duration_ms": 616.6
+  },
+  {
+    "index": 7,
+    "file": "footstep_007.wav",
+    "start_ms": 3735.49,
+    "end_ms": 4376.03,
+    "duration_ms": 640.54
+  },
+  {
+    "index": 8,
+    "file": "footstep_008.wav",
+    "start_ms": 4370.05,
+    "end_ms": 4998.62,
+    "duration_ms": 628.57
+  },
+  {
+    "index": 9,
+    "file": "footstep_009.wav",
+    "start_ms": 4992.63,
+    "end_ms": 5305.92,
+    "duration_ms": 313.29
+  },
+  {
+    "index": 10,
+    "file": "footstep_010.wav",
+    "start_ms": 5299.93,
+    "end_ms": 5621.2,
+    "duration_ms": 321.27
+  },
+  {
+    "index": 11,
+    "file": "footstep_011.wav",
+    "start_ms": 5615.22,
+    "end_ms": 6894.31,
+    "duration_ms": 1279.09
+  },
+  {
+    "index": 12,
+    "file": "footstep_012.wav",
+    "start_ms": 6888.32,
+    "end_ms": 7253.49,
+    "duration_ms": 365.17
+  },
+  {
+    "index": 13,
+    "file": "footstep_013.wav",
+    "start_ms": 7247.51,
+    "end_ms": 7512.9,
+    "duration_ms": 265.4
+  },
+  {
+    "index": 14,
+    "file": "footstep_014.wav",
+    "start_ms": 7506.92,
+    "end_ms": 8131.5,
+    "duration_ms": 624.58
+  },
+  {
+    "index": 15,
+    "file": "footstep_015.wav",
+    "start_ms": 8125.51,
+    "end_ms": 8845.87,
+    "duration_ms": 720.36
+  },
+  {
+    "index": 16,
+    "file": "footstep_016.wav",
+    "start_ms": 8839.89,
+    "end_ms": 9348.73,
+    "duration_ms": 508.84
+  },
+  {
+    "index": 17,
+    "file": "footstep_017.wav",
+    "start_ms": 9342.74,
+    "end_ms": 9719.89,
+    "duration_ms": 377.14
+  },
+  {
+    "index": 18,
+    "file": "footstep_018.wav",
+    "start_ms": 9713.9,
+    "end_ms": 9955.35,
+    "duration_ms": 241.45
+  },
+  {
+    "index": 19,
+    "file": "footstep_019.wav",
+    "start_ms": 9949.37,
+    "end_ms": 10601.88,
+    "duration_ms": 652.52
+  },
+  {
+    "index": 20,
+    "file": "footstep_020.wav",
+    "start_ms": 10595.9,
+    "end_ms": 11208.5,
+    "duration_ms": 612.61
+  },
+  {
+    "index": 21,
+    "file": "footstep_021.wav",
+    "start_ms": 11202.52,
+    "end_ms": 11843.06,
+    "duration_ms": 640.54
+  },
+  {
+    "index": 22,
+    "file": "footstep_022.wav",
+    "start_ms": 11837.07,
+    "end_ms": 12445.69,
+    "duration_ms": 608.62
+  },
+  {
+    "index": 23,
+    "file": "footstep_023.wav",
+    "start_ms": 12439.71,
+    "end_ms": 12739.71,
+    "duration_ms": 300.0
+  }
+]

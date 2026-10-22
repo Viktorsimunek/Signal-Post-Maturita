@@ -1,0 +1,407 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7047971862713404852
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5e1dc532bcb41949b58bc4f2abfbb7e, type: 3}
+  m_Name: LensDistortion
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.LensDistortion
+  active: 0
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.345
+  xMultiplier:
+    m_OverrideState: 1
+    m_Value: 1
+  yMultiplier:
+    m_OverrideState: 1
+    m_Value: 1
+  center:
+    m_OverrideState: 1
+    m_Value: {x: 0.5, y: 0.5}
+  scale:
+    m_OverrideState: 1
+    m_Value: 1
+--- !u!114 &-5058415108416954628
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8959644508ecfc249bf6ca18726c933d, type: 3}
+  m_Name: VHSSnowVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::VHSSnowVolumeComponent
+  active: 1
+  strength:
+    m_OverrideState: 1
+    m_Value: 1
+  scale:
+    m_OverrideState: 1
+    m_Value: 32
+  aspectRatio:
+    m_OverrideState: 1
+    m_Value: 128
+  threshold:
+    m_OverrideState: 1
+    m_Value: 0.763
+  footerMultiplier:
+    m_OverrideState: 1
+    m_Value: 0.25
+  footerHeight:
+    m_OverrideState: 1
+    m_Value: 0.387
+--- !u!114 &-4404017411257760157
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Bloom
+  active: 1
+  skipIterations:
+    m_OverrideState: 1
+    m_Value: 1
+  threshold:
+    m_OverrideState: 1
+    m_Value: 0.27
+  intensity:
+    m_OverrideState: 1
+    m_Value: 3.45
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.7
+  clamp:
+    m_OverrideState: 1
+    m_Value: 65472
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  highQualityFiltering:
+    m_OverrideState: 1
+    m_Value: 0
+  filter:
+    m_OverrideState: 1
+    m_Value: 0
+  downscale:
+    m_OverrideState: 0
+    m_Value: 0
+  maxIterations:
+    m_OverrideState: 0
+    m_Value: 6
+  dirtTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+    dimension: 1
+  dirtIntensity:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &-1668732016502884740
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06437c1ff663d574d9447842ba0a72e4, type: 3}
+  m_Name: ScreenSpaceLensFlare
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ScreenSpaceLensFlare
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.06
+  tintColor:
+    m_OverrideState: 1
+    m_Value: {r: 0.7617163, g: 1, b: 0.5896226, a: 1}
+  bloomMip:
+    m_OverrideState: 0
+    m_Value: 1
+  firstFlareIntensity:
+    m_OverrideState: 1
+    m_Value: 1
+  secondaryFlareIntensity:
+    m_OverrideState: 1
+    m_Value: 1
+  warpedFlareIntensity:
+    m_OverrideState: 1
+    m_Value: 1
+  warpedFlareScale:
+    m_OverrideState: 0
+    m_Value: {x: 1, y: 1}
+  samples:
+    m_OverrideState: 1
+    m_Value: 1
+  sampleDimmer:
+    m_OverrideState: 0
+    m_Value: 0.5
+  vignetteEffect:
+    m_OverrideState: 1
+    m_Value: 1
+  startingPosition:
+    m_OverrideState: 1
+    m_Value: 1.25
+  scale:
+    m_OverrideState: 1
+    m_Value: 1.5
+  streaksIntensity:
+    m_OverrideState: 1
+    m_Value: 2
+  streaksLength:
+    m_OverrideState: 1
+    m_Value: 0.292
+  streaksOrientation:
+    m_OverrideState: 1
+    m_Value: 0
+  streaksThreshold:
+    m_OverrideState: 1
+    m_Value: 0.203
+  resolution:
+    m_OverrideState: 0
+    m_Value: 4
+  chromaticAbberationIntensity:
+    m_OverrideState: 1
+    m_Value: 0.436
+--- !u!114 &-489043660988034221
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7489640358f34c46b5dfe6db3812728, type: 3}
+  m_Name: VHSGhostingVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::VHSGhostingVolumeComponent
+  active: 1
+  strength:
+    m_OverrideState: 1
+    m_Value: -0.05
+  xOffset:
+    m_OverrideState: 1
+    m_Value: -0.02
+  radius:
+    m_OverrideState: 1
+    m_Value: 2
+--- !u!114 &-170195830588924592
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0ba56801ec596247aa5b3cf20ce7ca9, type: 3}
+  m_Name: BloomVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::BloomVolumeComponent
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0
+  threshold:
+    m_OverrideState: 1
+    m_Value: 1
+  knee:
+    m_OverrideState: 1
+    m_Value: 0.5
+  radius:
+    m_OverrideState: 1
+    m_Value: 4
+  downscaleNear:
+    m_OverrideState: 1
+    m_Value: 2
+  downscaleFar:
+    m_OverrideState: 1
+    m_Value: 4
+  blurRadiusNear:
+    m_OverrideState: 1
+    m_Value: 1
+  blurRadiusFar:
+    m_OverrideState: 1
+    m_Value: 1.35
+  steps:
+    m_OverrideState: 1
+    m_Value: 255
+  saturation:
+    m_OverrideState: 1
+    m_Value: 0
+  gammaBefore:
+    m_OverrideState: 1
+    m_Value: 1
+  gammaAfter:
+    m_OverrideState: 1
+    m_Value: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: Global Volume Profile
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
+  components:
+  - {fileID: -4404017411257760157}
+  - {fileID: 167101514911019411}
+  - {fileID: -1668732016502884740}
+  - {fileID: -7047971862713404852}
+  - {fileID: -489043660988034221}
+  - {fileID: 1302216653482723343}
+  - {fileID: -5058415108416954628}
+  - {fileID: -170195830588924592}
+  - {fileID: 6400254380581550260}
+  - {fileID: 4917246704620671109}
+  - {fileID: 6449470929245182239}
+--- !u!114 &167101514911019411
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29fa0085f50d5e54f8144f766051a691, type: 3}
+  m_Name: FilmGrain
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FilmGrain
+  active: 1
+  type:
+    m_OverrideState: 1
+    m_Value: 0
+  intensity:
+    m_OverrideState: 1
+    m_Value: 1
+  response:
+    m_OverrideState: 1
+    m_Value: 0.8
+  texture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+--- !u!114 &1302216653482723343
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e60e65ceede0344d81abefbe9bc3727, type: 3}
+  m_Name: PixelizationVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::PixelizationVolumeComponent
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.125
+  pixelSize:
+    m_OverrideState: 1
+    m_Value: 4
+--- !u!114 &4917246704620671109
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e42a2bea903ddf2428af4afd966b1dcf, type: 3}
+  m_Name: VHSJitterVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::VHSJitterVolumeComponent
+  active: 1
+  strength:
+    m_OverrideState: 1
+    m_Value: 0.028
+  speed:
+    m_OverrideState: 1
+    m_Value: 32
+  frequency:
+    m_OverrideState: 1
+    m_Value: 64
+  gamma:
+    m_OverrideState: 1
+    m_Value: 1
+  footerJitter:
+    m_OverrideState: 1
+    m_Value: 0.4
+  footerHeight:
+    m_OverrideState: 1
+    m_Value: 0.25
+--- !u!114 &6400254380581550260
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9c0a50bc0fc2e74f833808c393d4346, type: 3}
+  m_Name: VHSGrainVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::VHSGrainVolumeComponent
+  active: 1
+  grainStrength:
+    m_OverrideState: 1
+    m_Value: 0.058
+  grainScale:
+    m_OverrideState: 1
+    m_Value: 1000
+  grainAspect:
+    m_OverrideState: 1
+    m_Value: 0.2
+  chromaStrength:
+    m_OverrideState: 1
+    m_Value: 0.039
+  chromaScale:
+    m_OverrideState: 1
+    m_Value: 16
+  chromaAspect:
+    m_OverrideState: 1
+    m_Value: -0.7
+--- !u!114 &6449470929245182239
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 281da18d7ee12774dba95bc370640a88, type: 3}
+  m_Name: PosterizeVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::PosterizeVolumeComponent
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.225
+  numColors:
+    m_OverrideState: 1
+    m_Value: 32
+  colorOffset:
+    m_OverrideState: 1
+    m_Value: 0
+  ditherStrength:
+    m_OverrideState: 1
+    m_Value: 0
+  ditherScale:
+    m_OverrideState: 1
+    m_Value: 4

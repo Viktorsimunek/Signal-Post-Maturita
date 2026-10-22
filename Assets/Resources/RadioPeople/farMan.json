@@ -1,0 +1,339 @@
+{
+  "id": "state_agent",
+  "speaker": "Man",
+  "voice": "FarMan",
+  "startNode": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "text": "State Internal Transit. Viktor Sencik speaking. Authorization code X-909.",
+      "answers": [
+        {
+          "text": "Ask for reason",
+          "reply": "Internal assignment.",
+          "nextNode": "assignment"
+        },
+        {
+          "text": "Ask destination",
+          "reply": "Northern relay sector.",
+          "nextNode": "destination"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You already have everything required for authorization.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "assignment",
+      "text": "You are not cleared for operational details.",
+      "answers": [
+        {
+          "text": "Ask what he is transporting",
+          "reply": "Confiscated communication equipment.",
+          "nextNode": "equipment"
+        },
+        {
+          "text": "Ask why State Internal is involved",
+          "reply": "Because local officers failed to contain the situation.",
+          "nextNode": "containment"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Your role here is procedural.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "destination",
+      "text": "There was unauthorized radio activity near the relay villages.",
+      "answers": [
+        {
+          "text": "Ask if arrests are involved",
+          "reply": "That depends on how cooperative the suspects decide to be.",
+          "nextNode": "arrests"
+        },
+        {
+          "text": "Ask if civilians are in danger",
+          "reply": "Civilians become endangered when they interfere with state stability.",
+          "nextNode": "stability"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You are delaying an active operation.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "equipment",
+      "text": "Illegal transmitters. Printed materials. A few recording tapes.",
+      "answers": [
+        {
+          "text": "Ask who owned the equipment",
+          "reply": "People who made poor decisions.",
+          "nextNode": "poor_decisions"
+        },
+        {
+          "text": "Ask what was broadcast",
+          "reply": "False information. Panic. Encouragement of unrest.",
+          "nextNode": "broadcast"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "This conversation is becoming unnecessary.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "containment",
+      "text": "Someone leaked restricted transmissions outside the border.",
+      "answers": [
+        {
+          "text": "Ask if they found the source",
+          "reply": "Not yet.",
+          "nextNode": "source"
+        },
+        {
+          "text": "Ask what happens when they do",
+          "reply": "That depends on whether the individual cooperates.",
+          "nextNode": "cooperate"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Authorize the crossing.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "arrests",
+      "text": "You sound nervous, operator.",
+      "answers": [
+        {
+          "text": "Ask what he means",
+          "reply": "Your pauses became longer after I mentioned arrests.",
+          "nextNode": "nervous"
+        },
+        {
+          "text": "Say nothing",
+          "reply": "Thought so.",
+          "nextNode": "silent"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You should avoid involving yourself emotionally.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "stability",
+      "text": "You would be surprised how quickly ordinary people become dangerous once they think nobody is listening.",
+      "answers": [
+        {
+          "text": "Ask if he listens to operators too",
+          "reply": "Sometimes.",
+          "nextNode": "operators"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Open the route.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "poor_decisions",
+      "text": "Most people believe they are invisible right before they disappear.",
+      "answers": [
+        {
+          "text": "Ask if he is threatening you",
+          "reply": "No, {PLAYER_NAME}. If I wanted to threaten you, this conversation would feel very different.",
+          "nextNode": "player_name"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Do your job.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "broadcast",
+      "text": "You know the kind. Stories about protests. Missing workers. Dead civilians.",
+      "answers": [
+        {
+          "text": "Ask if the stories were false",
+          "reply": "Truth is a matter for state interpretation.",
+          "nextNode": "truth"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "This route has priority clearance.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "source",
+      "text": "Leaking information across the border is considered treason now.",
+      "answers": [
+        {
+          "text": "Ask what punishment that carries",
+          "reply": "Officially? Reassignment.",
+          "nextNode": "reassignment"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You understand the seriousness of the situation.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "cooperate",
+      "text": "People usually cooperate once they understand how alone they really are.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Authorize the gate, operator.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "nervous",
+      "text": "You should be careful with that.",
+      "answers": [
+        {
+          "text": "Ask careful about what",
+          "reply": "Patterns. Hesitation. Curiosity.",
+          "nextNode": "patterns"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Internal records notice unusual behavior.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "silent",
+      "text": "Silence is usually the smarter option.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Open the gate.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "operators",
+      "text": "Operators hear many things. Sometimes they repeat them.",
+      "answers": [
+        {
+          "text": "Ask what happens to those operators",
+          "reply": "Most transfers happen quietly.",
+          "nextNode": "transfers"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You are not one of those operators, I assume.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "player_name",
+      "text": "Your file says you adapt quickly under pressure. I hope that assessment was correct.",
+      "answers": [
+        {
+          "text": "Ask how he knows your file",
+          "reply": "State Internal has access to many things.",
+          "nextNode": "file"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Do not make this difficult for yourself.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "truth",
+      "text": "The public does not need truth. It needs stability.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Authorize the crossing.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "reassignment",
+      "text": "Unofficially? People stop asking where they were sent.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "You should process my authorization now.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "patterns",
+      "text": "People who hesitate around simple decisions tend to attract attention.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "This should be a simple decision.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "transfers",
+      "text": "Different station. Different office. Sometimes no office at all.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "I would avoid unnecessary complications if I were you.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "file",
+      "text": "Including your employment record, {PLAYER_NAME}.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Authorize the gate.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "decision",
+      "text": "My authorization is valid. Any delay will be documented.",
+      "answers": [
+        {
+          "text": "Let him pass",
+          "reply": "Good. You made the correct decision.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let him pass",
+          "reply": "Do as you wish {PLAYER_NAME}. We will meet again...",
+          "nextNode": ""
+        }
+      ]
+    }
+  ]
+}

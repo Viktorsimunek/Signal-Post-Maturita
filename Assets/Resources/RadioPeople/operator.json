@@ -1,0 +1,323 @@
+{
+  "id": "former_operator",
+  "speaker": "Man",
+  "voice": "Man",
+  "startNode": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "text": "Northern relay operator Pavel Rezek requesting inter-regional transfer. Authorization code N-301.",
+      "answers": [
+        {
+          "text": "Ask for transfer reason",
+          "reply": "Station failure.",
+          "nextNode": "failure"
+        },
+        {
+          "text": "Ask where he is going",
+          "reply": "South sector communications office. Supposedly.",
+          "nextNode": "destination"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You already checked the code, did you not?",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "failure",
+      "text": "The official report says electrical fire.",
+      "answers": [
+        {
+          "text": "Ask what really happened",
+          "reply": "The station stopped being useful to them.",
+          "nextNode": "useful"
+        },
+        {
+          "text": "Ask if anyone survived",
+          "reply": "Most of us.",
+          "nextNode": "survived"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You should avoid reading too deeply into reports.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "destination",
+      "text": "You know how transfers work. Different building. Same voice on the radio.",
+      "answers": [
+        {
+          "text": "Ask how long he worked there",
+          "reply": "Long enough.",
+          "nextNode": "worked"
+        },
+        {
+          "text": "Ask if he liked the job",
+          "reply": "At first.",
+          "nextNode": "liked"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "I imagine your station looks very similar to mine.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "useful",
+      "text": "Operators are valuable right until they start thinking independently.",
+      "answers": [
+        {
+          "text": "Ask what he means",
+          "reply": "You already know what I mean.",
+          "nextNode": "independent"
+        },
+        {
+          "text": "Ask if he broke protocol",
+          "reply": "Everyone does eventually.",
+          "nextNode": "protocol"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Do not sound so nervous, {PLAYER_NAME}.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "survived",
+      "text": "A few disappeared after the investigation.",
+      "answers": [
+        {
+          "text": "Ask what investigation",
+          "reply": "Unauthorized transmissions. Delayed denials. Missing reports.",
+          "nextNode": "investigation"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You should always file your reports on time.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "worked",
+      "text": "Long enough to memorize the sound of people lying over weak signals.",
+      "answers": [
+        {
+          "text": "Ask if he can tell when you lie",
+          "reply": "Usually.",
+          "nextNode": "lying"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You hesitate before difficult choices too, don't you?",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "liked",
+      "text": "You feel important during the first weeks. Then the voices start staying with you.",
+      "answers": [
+        {
+          "text": "Ask what voices",
+          "reply": "The ones you denied. Mostly the quiet ones.",
+          "nextNode": "voices"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "That part comes later.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "independent",
+      "text": "They sent you the child too, didn't they?",
+      "answers": [
+        {
+          "text": "Ask how he knows about the child",
+          "reply": "Because they sent one to me.",
+          "nextNode": "child"
+        },
+        {
+          "text": "Say nothing",
+          "reply": "Thought so.",
+          "nextNode": "thought_so"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "The tests become more obvious after a while.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "protocol",
+      "text": "First you bend protocol for someone desperate. Then you start wondering why the protocol exists at all.",
+      "answers": [
+        {
+          "text": "Ask if he helped people cross",
+          "reply": "Sometimes.",
+          "nextNode": "helped"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "The system notices patterns eventually.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "investigation",
+      "text": "Funny thing is, they already knew which operators were guilty before questioning started.",
+      "answers": [
+        {
+          "text": "Ask how",
+          "reply": "Decision timing. Voice stress. Frequency of manual overrides.",
+          "nextNode": "monitoring"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You should assume every delay is recorded.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "lying",
+      "text": "You are wondering whether I am warning you or testing you.",
+      "answers": [
+        {
+          "text": "Ask which one it is",
+          "reply": "Does it matter?",
+          "nextNode": "matter"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Paranoia becomes part of the routine.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "voices",
+      "text": "You start hearing them after shifts. Even when the radio is off.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Do not worry. That part comes later.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "child",
+      "text": "Young voice. No valid ID. Said someone was waiting beyond the border.",
+      "answers": [
+        {
+          "text": "Ask what he did",
+          "reply": "What do you think I did?",
+          "nextNode": "what_do_you_think"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You sound exactly like I did.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "thought_so",
+      "text": "Silence usually means guilt. Or fear. Sometimes both.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "You should be careful which one they see in you.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "helped",
+      "text": "Then one night I realized I stopped asking who deserved help.",
+      "answers": [
+        {
+          "text": "Ask if that was wrong",
+          "reply": "I still do not know.",
+          "nextNode": "wrong"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Maybe that was the moment they marked my file.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "text": "Operators think they monitor the border. Really, the border monitors them.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "You should remember that.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "matter",
+      "text": "You will still think about this conversation after your shift ends.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "That is enough for me.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "what_do_you_think",
+      "text": "The difficult part is not opening the gate. It is remembering the ones you kept closed.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "That stays with you longer.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "wrong",
+      "text": "Systems survive by convincing people that mercy is dangerous.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Eventually you stop knowing whether they were right.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "decision",
+      "text": "My transfer authorization is valid. But then again, so was yours when you arrived.",
+      "answers": [
+        {
+          "text": "Let him pass",
+          "reply": "Take care of the station, operator.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let him pass",
+          "reply": "Yeah. I expected that.",
+          "nextNode": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "index": 1,
+    "file": "footstep_001.wav",
+    "start_ms": 16.0,
+    "end_ms": 394.0,
+    "duration_ms": 378.0
+  },
+  {
+    "index": 2,
+    "file": "footstep_002.wav",
+    "start_ms": 388.0,
+    "end_ms": 794.0,
+    "duration_ms": 406.0
+  },
+  {
+    "index": 3,
+    "file": "footstep_003.wav",
+    "start_ms": 788.0,
+    "end_ms": 1538.0,
+    "duration_ms": 750.0
+  },
+  {
+    "index": 4,
+    "file": "footstep_004.wav",
+    "start_ms": 1532.0,
+    "end_ms": 1894.0,
+    "duration_ms": 362.0
+  },
+  {
+    "index": 5,
+    "file": "footstep_005.wav",
+    "start_ms": 1888.0,
+    "end_ms": 2194.0,
+    "duration_ms": 306.0
+  },
+  {
+    "index": 6,
+    "file": "footstep_006.wav",
+    "start_ms": 2188.0,
+    "end_ms": 2426.0,
+    "duration_ms": 238.0
+  },
+  {
+    "index": 7,
+    "file": "footstep_007.wav",
+    "start_ms": 2420.0,
+    "end_ms": 2734.0,
+    "duration_ms": 314.0
+  },
+  {
+    "index": 8,
+    "file": "footstep_008.wav",
+    "start_ms": 2728.0,
+    "end_ms": 3098.0,
+    "duration_ms": 370.0
+  },
+  {
+    "index": 9,
+    "file": "footstep_009.wav",
+    "start_ms": 3092.0,
+    "end_ms": 3494.0,
+    "duration_ms": 402.0
+  },
+  {
+    "index": 10,
+    "file": "footstep_010.wav",
+    "start_ms": 3488.0,
+    "end_ms": 4366.0,
+    "duration_ms": 878.0
+  },
+  {
+    "index": 11,
+    "file": "footstep_011.wav",
+    "start_ms": 4360.0,
+    "end_ms": 4830.0,
+    "duration_ms": 470.0
+  },
+  {
+    "index": 12,
+    "file": "footstep_012.wav",
+    "start_ms": 4824.0,
+    "end_ms": 5314.0,
+    "duration_ms": 490.0
+  },
+  {
+    "index": 13,
+    "file": "footstep_013.wav",
+    "start_ms": 5308.0,
+    "end_ms": 5750.0,
+    "duration_ms": 442.0
+  },
+  {
+    "index": 14,
+    "file": "footstep_014.wav",
+    "start_ms": 5744.0,
+    "end_ms": 6174.0,
+    "duration_ms": 430.0
+  },
+  {
+    "index": 15,
+    "file": "footstep_015.wav",
+    "start_ms": 6168.0,
+    "end_ms": 6302.0,
+    "duration_ms": 134.0
+  },
+  {
+    "index": 16,
+    "file": "footstep_016.wav",
+    "start_ms": 6296.0,
+    "end_ms": 6602.0,
+    "duration_ms": 306.0
+  },
+  {
+    "index": 17,
+    "file": "footstep_017.wav",
+    "start_ms": 6596.0,
+    "end_ms": 7038.0,
+    "duration_ms": 442.0
+  },
+  {
+    "index": 18,
+    "file": "footstep_018.wav",
+    "start_ms": 7032.0,
+    "end_ms": 7490.0,
+    "duration_ms": 458.0
+  },
+  {
+    "index": 19,
+    "file": "footstep_019.wav",
+    "start_ms": 7484.0,
+    "end_ms": 7898.0,
+    "duration_ms": 414.0
+  },
+  {
+    "index": 20,
+    "file": "footstep_020.wav",
+    "start_ms": 7892.0,
+    "end_ms": 8354.0,
+    "duration_ms": 462.0
+  },
+  {
+    "index": 21,
+    "file": "footstep_021.wav",
+    "start_ms": 8348.0,
+    "end_ms": 8758.0,
+    "duration_ms": 410.0
+  },
+  {
+    "index": 22,
+    "file": "footstep_022.wav",
+    "start_ms": 8752.0,
+    "end_ms": 9162.0,
+    "duration_ms": 410.0
+  },
+  {
+    "index": 23,
+    "file": "footstep_023.wav",
+    "start_ms": 9156.0,
+    "end_ms": 9554.0,
+    "duration_ms": 398.0
+  },
+  {
+    "index": 24,
+    "file": "footstep_024.wav",
+    "start_ms": 9548.0,
+    "end_ms": 9970.0,
+    "duration_ms": 422.0
+  },
+  {
+    "index": 25,
+    "file": "footstep_025.wav",
+    "start_ms": 9964.0,
+    "end_ms": 10350.0,
+    "duration_ms": 386.0
+  },
+  {
+    "index": 26,
+    "file": "footstep_026.wav",
+    "start_ms": 10344.0,
+    "end_ms": 10522.0,
+    "duration_ms": 178.0
+  },
+  {
+    "index": 27,
+    "file": "footstep_027.wav",
+    "start_ms": 10516.0,
+    "end_ms": 10742.0,
+    "duration_ms": 226.0
+  },
+  {
+    "index": 28,
+    "file": "footstep_028.wav",
+    "start_ms": 10736.0,
+    "end_ms": 11170.0,
+    "duration_ms": 434.0
+  },
+  {
+    "index": 29,
+    "file": "footstep_029.wav",
+    "start_ms": 11164.0,
+    "end_ms": 11578.0,
+    "duration_ms": 414.0
+  },
+  {
+    "index": 30,
+    "file": "footstep_030.wav",
+    "start_ms": 11572.0,
+    "end_ms": 11998.0,
+    "duration_ms": 426.0
+  },
+  {
+    "index": 31,
+    "file": "footstep_031.wav",
+    "start_ms": 11992.0,
+    "end_ms": 12442.0,
+    "duration_ms": 450.0
+  },
+  {
+    "index": 32,
+    "file": "footstep_032.wav",
+    "start_ms": 12436.0,
+    "end_ms": 12565.92,
+    "duration_ms": 129.92
+  }
+]

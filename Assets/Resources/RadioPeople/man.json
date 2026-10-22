@@ -1,0 +1,307 @@
+{
+  "id": "wanted_guard",
+  "speaker": "Man",
+  "voice": "Man",
+  "startNode": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "text": "Operator... this is Karel Dvorak. Border unit transfer code R-118.",
+      "answers": [
+        {
+          "text": "Ask for destination",
+          "reply": "North road. Does it matter?",
+          "nextNode": "destination"
+        },
+        {
+          "text": "Ask why the code is revoked",
+          "reply": "So you checked the database already.",
+          "nextNode": "revoked"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You already know what the screen says.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "destination",
+      "text": "There is nobody waiting for me there. That is the point.",
+      "answers": [
+        {
+          "text": "Ask what he means",
+          "reply": "No officers. No checkpoints. No crowds.",
+          "nextNode": "crowds"
+        },
+        {
+          "text": "Ask if he is armed",
+          "reply": "Would it matter if I said no?",
+          "nextNode": "armed"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You should make the decision quickly.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "revoked",
+      "text": "Funny thing about the system. One week you are protecting the border. Next week your face appears on wanted reports.",
+      "answers": [
+        {
+          "text": "Ask what happened",
+          "reply": "Orders changed.",
+          "nextNode": "orders"
+        },
+        {
+          "text": "Ask if he committed the crimes",
+          "reply": "Depends which report you read.",
+          "nextNode": "reports"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "I know what the protocol says.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "crowds",
+      "text": "Crowds are loud before the shooting starts.",
+      "answers": [
+        {
+          "text": "Ask what shooting",
+          "reply": "Protests. Factory workers. Doesn't matter anymore.",
+          "nextNode": "protests"
+        },
+        {
+          "text": "Ask if civilians died",
+          "reply": "You already know the answer to that.",
+          "nextNode": "civilians"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You sound nervous, operator.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "armed",
+      "text": "People always think weapons are the dangerous part.",
+      "answers": [
+        {
+          "text": "Ask what the dangerous part is",
+          "reply": "The moment someone decides another human being is acceptable collateral.",
+          "nextNode": "collateral"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Open the gate or keep it closed. Simple.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "orders",
+      "text": "They told us the crowd was armed. They told us to restore order.",
+      "answers": [
+        {
+          "text": "Ask if the crowd was armed",
+          "reply": "I never saw a weapon.",
+          "nextNode": "weapon"
+        },
+        {
+          "text": "Ask why he is wanted now",
+          "reply": "Maybe I saw too much. Maybe I talked too much after.",
+          "nextNode": "talked"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "The database wants me dead more than captured.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "reports",
+      "text": "Internal crimes. Civilian casualties. Missing weapons.",
+      "answers": [
+        {
+          "text": "Ask which part is false",
+          "reply": "I did not say any part was false.",
+          "nextNode": "false"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You should stop asking questions you do not want answered.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "protests",
+      "text": "You ever hear a crowd go silent after the first burst?",
+      "answers": [
+        {
+          "text": "Say nothing",
+          "reply": "Yeah. Most people do not forget that sound.",
+          "nextNode": "silence"
+        },
+        {
+          "text": "Ask why he is telling you this",
+          "reply": "Because you are the only voice I have heard in two days.",
+          "nextNode": "alone"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "I should keep moving.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "civilians",
+      "text": "There were children there.",
+      "answers": [
+        {
+          "text": "Ask if he shot them",
+          "reply": "After the first shots, people stop looking human for a while.",
+          "nextNode": "human"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "The state calls it an unfortunate incident now.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "collateral",
+      "text": "After that, everything becomes easier.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "You should not let me stay on this line much longer.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "weapon",
+      "text": "Just signs. Flags. People shouting.",
+      "answers": [
+        {
+          "text": "Ask who fired first",
+          "reply": "We did.",
+          "nextNode": "first_fire"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Funny thing is, the report still called it self-defense.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "talked",
+      "text": "Turns out they do not like witnesses either.",
+      "answers": [
+        {
+          "text": "Ask if he regrets it",
+          "reply": "Every night.",
+          "nextNode": "regret"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Maybe this gate is the last choice I get.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "false",
+      "text": "The system prefers dead monsters over living embarrassments.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "You know what happens if you report me.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "silence",
+      "text": "Sometimes I still hear it before I sleep.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Make your decision, operator.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "alone",
+      "text": "Funny, isn't it? They trained us to shoot crowds, then acted surprised when some of us broke.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "I do not have much time left.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "human",
+      "text": "You stop seeing faces. That is how they make it possible.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Do what you think is right.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "first_fire",
+      "text": "First shots are the hardest. After that, your hands stop shaking.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "I wish I did not remember that.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "regret",
+      "text": "Regret does not bring people back.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Neither does a closed border.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "decision",
+      "text": "The database says not to trust me. Maybe it is right.",
+      "answers": [
+        {
+          "text": "Let him pass",
+          "reply": "Then open the gate before either of us changes our mind.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let him pass",
+          "reply": "Yeah. That is probably the smarter decision.",
+          "nextNode": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "objectives": [
+    {
+      "id": "intro_test",
+      "wantedMessage": "CIVIL HARMONY TEST",
+      "allowedMessageMistakes": 2,
+      "confirmationCode": "",
+      "wantedFrequency": 104.6,
+      "requireCorrectFrequency": true,
+      "frequencyTolerance": 0.15,
+      "faxTriggerOnComplete": "intro_test_complete",
+      "faxIdOnComplete": "",
+      "requiredRadioCalls": 1,
+      "radioCallPersonIds": [  ],
+      "endSequence": false
+    },
+    {
+      "id": "second_message",
+      "wantedMessage": "BORDER SECTOR 2 CLOSED",
+      "allowedMessageMistakes": 2,
+      "confirmationCode": "",
+      "wantedFrequency": 98.3,
+      "requireCorrectFrequency": true,
+      "frequencyTolerance": 0.15,
+      "faxTriggerOnComplete": "second_fax_complete",
+      "faxIdOnComplete": "",
+      "requiredRadioCalls": 2,
+      "radioCallPersonIds": [],
+      "endSequence": false
+    },
+    {
+      "id": "third_message",
+      "wantedMessage": "PROTESTS IN SECTOR 7 DISPERSED",
+      "allowedMessageMistakes": 3,
+      "confirmationCode": "",
+      "wantedFrequency": 96.1,
+      "requireCorrectFrequency": true,
+      "frequencyTolerance": 0.15,
+      "faxTriggerOnComplete": "",
+      "faxIdOnComplete": "Fax_04",
+      "requiredRadioCalls": 1,
+      "radioCallPersonIds": [ "woman" ],
+      "endSequence": false
+    },
+    {
+      "id": "Fax_04",
+      "wantedMessage": "SECTOR 4 REMAINS STABLE",
+      "allowedMessageMistakes": 3,
+      "confirmationCode": "",
+      "wantedFrequency": 101.2,
+      "requireCorrectFrequency": true,
+      "frequencyTolerance": 0.15,
+      "faxTriggerOnComplete": "",
+      "faxIdOnComplete": "Fax_05",
+      "requiredRadioCalls": 2,
+      "radioCallPersonIds": [ "child", "farMan" ],
+      "endSequence": false
+    },
+    {
+      "id": "Fax_05",
+      "wantedMessage": "NO SURVIVORS LOCATED OUTSIDE PERIMETER",
+      "allowedMessageMistakes": 3,
+      "confirmationCode": "",
+      "wantedFrequency": 95.7,
+      "requireCorrectFrequency": true,
+      "frequencyTolerance": 0.15,
+      "faxTriggerOnComplete": "",
+      "faxIdOnComplete": "",
+      "requiredRadioCalls": 2,
+      "radioCallPersonIds": [ "man", "operator" ],
+      "endSequence": true
+    }
+  ]
+}

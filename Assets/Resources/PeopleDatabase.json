@@ -1,0 +1,53 @@
+{
+  "people": [
+    {
+      "code": "A-104",
+      "fullName": "Marek Novotny",
+      "dateOfBirth": "1984-02-17",
+      "nationality": "---",
+      "documentId": "CZ-4419-22",
+      "exitAllowed": true,
+      "exitStatus": "EXIT PERMIT VALID",
+      "note": "Routine worker transfer."
+    },
+    {
+      "code": "B-217",
+      "fullName": "Elena Kralova",
+      "dateOfBirth": "1991-09-03",
+      "nationality": "---",
+      "documentId": "CZ-8091-11",
+      "exitAllowed": false,
+      "exitStatus": "EXIT HOLD ACTIVE",
+      "note": "Missing regional clearance stamp."
+    },
+{
+  "code": "D-442",
+  "fullName": "Hana Vesela",
+  "dateOfBirth": "1987-11-14",
+  "nationality": "---",
+  "documentId": "CZ-5521-44",
+  "exitAllowed": true,
+  "exitStatus": "MEDICAL TRANSIT APPROVED",
+  "note": "Temporary humanitarian clearance. Route B only."
+},
+{
+  "code": "X-909",
+  "fullName": "Viktor Sencik",
+  "dateOfBirth": "1972-04-11",
+  "nationality": "---",
+  "documentId": "CZ-0001-09",
+  "exitAllowed": true,
+  "exitStatus": "PRIORITY STATE CLEARANCE",
+  "note": "STATE INTERNAL // OPERATOR COOPERATION MANDATORY // DO NOT DELAY TRANSIT"
+},{
+  "code": "R-118",
+  "fullName": "Karel Dvorak",
+  "dateOfBirth": "1968-08-22",
+  "nationality": "Czech",
+  "documentId": "CZ-1188-73",
+  "exitAllowed": false,
+  "exitStatus": "WANTED FOR INTERNAL CRIMES",
+  "note": "AUTHORIZATION REVOKED // DO NOT AUTHORIZE CROSSING // REPORT IMMEDIATELY"
+}
+  ]
+}

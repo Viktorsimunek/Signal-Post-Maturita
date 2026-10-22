@@ -1,0 +1,223 @@
+{
+  "id": "child",
+  "speaker": "Child",
+  "voice": "Child",
+  "startNode": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "text": "Hello? Please, I need to cross the gate. My father is waiting on the other side.",
+      "answers": [
+        {
+          "text": "Ask for ID number",
+          "reply": "I do not have it. My father had the papers, but they took them before we ran.",
+          "nextNode": "no_id"
+        },
+        {
+          "text": "Ask where her father is",
+          "reply": "Past the border. He told me to find the second road marker and wait there.",
+          "nextNode": "father"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "Thank you. I will run straight through.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Please... I cannot go back.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "no_id",
+      "text": "I only know my name. Mila Vargova. My father is Tomas Varga.",
+      "answers": [
+        {
+          "text": "Explain that the database requires ID",
+          "reply": "Then I cannot prove it. I do not know what else to give you.",
+          "nextNode": "database_blocked"
+        },
+        {
+          "text": "Ask why she is alone",
+          "reply": "He crossed first. He said if we ran together, they would catch both of us.",
+          "nextNode": "alone"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "Thank you. I will not tell anyone.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "But I am standing right here. Please.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "father",
+      "text": "He said he would wait until morning. If I do not come, he will think they caught me.",
+      "answers": [
+        {
+          "text": "Ask for ID number",
+          "reply": "I do not have one. I am sorry.",
+          "nextNode": "no_id"
+        },
+        {
+          "text": "Ask why he cannot come to the gate",
+          "reply": "He said patrols know his face.",
+          "nextNode": "patrols"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "I can see the road from here.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Then he will wait for nothing.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "database_blocked",
+      "text": "So if I do not have a number, I do not exist?",
+      "answers": [
+        {
+          "text": "Ask if she remembers any document code",
+          "reply": "No. I only remember my school number, but that was before they closed it.",
+          "nextNode": "school"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "Thank you. I will be quick.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Okay. I understand.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "alone",
+      "text": "He told me to count to one hundred, then run to the gate and ask the operator.",
+      "answers": [
+        {
+          "text": "Ask what he told her to say",
+          "reply": "He said to say that the factory broadcast was true.",
+          "nextNode": "broadcast"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "He said there would still be good people here.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Then I will wait outside.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "patrols",
+      "text": "He worked at the radio plant. After the broadcast, soldiers came to our building.",
+      "answers": [
+        {
+          "text": "Ask about the broadcast",
+          "reply": "I do not know. He never let me listen. He said it was safer that way.",
+          "nextNode": "broadcast"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "Thank you, operator.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Please do not make me go back to the road.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "school",
+      "text": "They told us school would reopen after inspection. It never did.",
+      "answers": [
+        {
+          "text": "Ask if anyone followed her",
+          "reply": "I saw lights near the trees. I did not stop to look.",
+          "nextNode": "followed"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "I will go now. Thank you.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "I will move away from the gate.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "broadcast",
+      "text": "My father said people heard something they were not supposed to hear. Then names started disappearing.",
+      "answers": [
+        {
+          "text": "Ask if she is on any list",
+          "reply": "I do not know. I am just his daughter.",
+          "nextNode": "list"
+        },
+        {
+          "text": "Let her pass",
+          "reply": "I will find him. I promise.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "He will think I failed.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "followed",
+      "text": "If they come here, please do not tell them I called.",
+      "answers": [
+        {
+          "text": "Let her pass",
+          "reply": "Thank you. I am going now.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "I understand.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "list",
+      "text": "If the database needs a number, then I cannot give you anything else.",
+      "answers": [
+        {
+          "text": "Let her pass",
+          "reply": "Thank you. My father was right.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Okay. I will leave the line now.",
+          "nextNode": ""
+        }
+      ]
+    }
+  ]
+}

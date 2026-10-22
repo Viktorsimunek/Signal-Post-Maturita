@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PSX_Skybox_TimeRampNoiseSun
+  m_Shader: {fileID: 4800000, guid: 9a7f2b9e3d2a4b8c9f1e6d7c5b4a3210, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: _Lightning
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _CloudMap:
+        m_Texture: {fileID: 2800000, guid: b6ecacc84cd57124a8e5fbc3af3b201c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LightningTex:
+        m_Texture: {fileID: 2800000, guid: da85868597ec4bc438ef4a27a3ef4fcc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MoonTex:
+        m_Texture: {fileID: 2800000, guid: 5a70d2250f5643443b4550a21a9f11a4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StarsTex:
+        m_Texture: {fileID: 2800000, guid: a6271ccd1c1c550448eb23fcc9cff9d1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StormCloudTex:
+        m_Texture: {fileID: 2800000, guid: 54970c85901c90948a9005a444e7bec5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SunTex:
+        m_Texture: {fileID: 2800000, guid: 30a44245c7e9b46498e9506e5d7dcbec, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _CloudGamma: 0.3
+    - _CloudOpacity: 1
+    - _CloudScale: 0.46
+    - _CloudSpeed: 0.213
+    - _ColorSteps: 83
+    - _DitherAmt: 0.014
+    - _DitherEnabled: 0
+    - _DitherSize: 1
+    - _Exposure: 1.8
+    - _FogSkyAmount: 0.914
+    - _FogSkyBias: -0.405
+    - _FogSkyBottomHeight: 0.016
+    - _FogSkyHeight: 1
+    - _FogSkyHorizonBoost: 1
+    - _FogSkyNoiseAmount: 0.006
+    - _FogSkyPower: 0
+    - _FogSkySoftness: 0.044
+    - _FogSkyTopAmount: 0.05
+    - _FogSkyTopHeight: 0
+    - _Lightning: 0
+    - _LightningDayBoost: 1.89
+    - _LightningDouble: 0.75
+    - _LightningDuration: 0.961
+    - _LightningEdgeNoise: 0.18
+    - _LightningEdgeNoiseScale: 6
+    - _LightningFreq: 2.99
+    - _LightningIntensity: 6
+    - _LightningScale: 1.13
+    - _LightningSkyFlash: 2
+    - _LightningSoftness: 0.976
+    - _MoonAltDeg: 27.2
+    - _MoonAzimDeg: 45
+    - _MoonNightMul: 1
+    - _MoonSizeDeg: 1.59
+    - _NoiseInt: 0.1
+    - _NoiseScale: 2.7
+    - _StarsInt: 0.39
+    - _StarsScale: 1.44
+    - _Storm: 0
+    - _StormCloudBoost: 8
+    - _StormCloudContrast: 5.2
+    - _StormCloudDetail: 1.33
+    - _StormCloudGamma: 1.504
+    - _StormCloudScale: 12
+    - _StormCloudSpeed: 0.456
+    - _StormDarkenSky: 0.9
+    - _StormDayDesaturate: 1
+    - _StormDayExtraDark: 2
+    - _StormDayToNight: 0.581
+    - _StormHardness: 3
+    - _StormHorizonPower: 1.6
+    - _StormSideSpread: 0.627
+    - _StormSkyThrough: 0.25
+    - _StormSkyThroughMin: 0.88
+    - _StormSunDim: 0.34
+    - _StormUsesBaseClouds: 1
+    - _SunAzimOffset: 93
+    - _SunDayOnly: 1
+    - _SunGlowDeg: 1
+    - _SunGlowInt: 1.2
+    - _SunHaze: 0.389
+    - _SunMaxAltDeg: 85
+    - _SunSizeDeg: 2
+    - _SunSizeMul: 7.7
+    - _Time01: 0.728
+    - _Twilight: 0.18
+    - _UsePSXQuantize: 0
+    m_Colors:
+    - _CloudCol: {r: 0.8, g: 0.85, b: 0.9, a: 1}
+    - _HorizonDay: {r: 0.7, g: 0.75, b: 0.8, a: 1}
+    - _HorizonNight: {r: 0.059999965, g: 0.079999976, b: 0.11999995, a: 1}
+    - _LightningTint: {r: 1, g: 1.02, b: 1.1, a: 1}
+    - _MoonColor: {r: 1, g: 1, b: 1, a: 1}
+    - _StormCloudColor: {r: 0.01, g: 0.01, b: 0.015, a: 1}
+    - _StormDayTint: {r: 0.21999997, g: 0.23999995, b: 0.27999997, a: 1}
+    - _SunColor: {r: 1, g: 0.96, b: 0.85, a: 1}
+    - _SunHazeWarmth: {r: 1.08, g: 0.85, b: 0.7, a: 1}
+    - _ZenithDay: {r: 0.24999997, g: 0.39999998, b: 0.7, a: 1}
+    - _ZenithNight: {r: 0.02, g: 0.059999965, b: 0.11999995, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -1,0 +1,39 @@
+{
+  "faxes": [
+    {
+      "id": "Fax_01",
+      "title": "Intro Fax",
+      "textureName": "Intro_fax",
+      "time": 10,
+      "trigger": ""
+    },
+    {
+      "id": "Fax_02",
+      "title": "Second Instructions",
+      "textureName": "Fax_2",
+      "time": 0,
+      "trigger": "intro_test_complete"
+    },
+    {
+      "id": "Fax_03",
+      "title": "Third Instructions",
+      "textureName": "Fax_3",
+      "time": 0,
+      "trigger": "second_fax_complete"
+    },
+    {
+      "id": "Fax_04",
+      "title": "Fourth Instructions",
+      "textureName": "Fax_4",
+      "time": 0,
+      "trigger": ""
+    },
+    {
+      "id": "Fax_05",
+      "title": "Final Instructions",
+      "textureName": "Fax_5",
+      "time": 0,
+      "trigger": ""
+    }
+  ]
+}

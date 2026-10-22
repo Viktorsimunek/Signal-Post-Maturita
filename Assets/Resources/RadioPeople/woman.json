@@ -1,0 +1,286 @@
+{
+  "id": "woman_medicine",
+  "speaker": "Woman",
+  "voice": "Woman",
+  "startNode": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "text": "This is Hana Vesela. Requesting border passage through sector road B. Authorization code D-442.",
+      "answers": [
+        {
+          "text": "Ask for reason",
+          "reply": "I am transporting medical supplies to a house beyond the ridge. They are expecting me before morning.",
+          "nextNode": "reason"
+        },
+        {
+          "text": "Ask what supplies she carries",
+          "reply": "Antibiotics. Bandages. Fever medication. Nothing illegal.",
+          "nextNode": "supplies"
+        }
+      ]
+    },
+    {
+      "id": "reason",
+      "text": "The road near the valley checkpoint was closed, so I had to take the longer route.",
+      "answers": [
+        {
+          "text": "Ask who is waiting for the medicine",
+          "reply": "A family outside the registered zone. The child has an infection.",
+          "nextNode": "family"
+        },
+        {
+          "text": "Ask if she has official delivery papers",
+          "reply": "The authorization should already be attached to my code.",
+          "nextNode": "papers"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Then please make your decision.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "supplies",
+      "text": "You can inspect the case if protocol requires it.",
+      "answers": [
+        {
+          "text": "Ask why medicine is needed outside the zone",
+          "reply": "Because not everyone inside the border receives treatment anymore.",
+          "nextNode": "outside_zone"
+        },
+        {
+          "text": "Ask if she knows the family personally",
+          "reply": "I know enough to understand they will not survive another night without help.",
+          "nextNode": "personal"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Then please make your decision.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "family",
+      "text": "The father used to work maintenance at the western transmitter station.",
+      "answers": [
+        {
+          "text": "Ask if they are registered citizens",
+          "reply": "Not anymore.",
+          "nextNode": "unregistered"
+        },
+        {
+          "text": "Ask why they lost registration",
+          "reply": "Because they asked questions at the wrong time.",
+          "nextNode": "questions"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "Operator, please. I have already lost too much time.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "papers",
+      "text": "You should see a temporary clearance attached to code D-442.",
+      "answers": [
+        {
+          "text": "Ask why clearance is temporary",
+          "reply": "Because permanent approvals became difficult after the protests.",
+          "nextNode": "protests"
+        },
+        {
+          "text": "Ask who approved the request",
+          "reply": "Central medical office. At least officially.",
+          "nextNode": "office"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You have my code. You have the clearance.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "outside_zone",
+      "text": "There are entire settlements the system pretends no longer exist.",
+      "answers": [
+        {
+          "text": "Ask how she found them",
+          "reply": "People talk quietly. Especially the sick ones.",
+          "nextNode": "quietly"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You know enough now. Please decide.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "personal",
+      "text": "I treated the girl once before. She could barely breathe.",
+      "answers": [
+        {
+          "text": "Ask why they cannot visit a state clinic",
+          "reply": "State clinics ask for identity verification first.",
+          "nextNode": "clinic"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "She needs the medicine. That is all that matters now.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "unregistered",
+      "text": "Their records disappeared after the factory demonstrations.",
+      "answers": [
+        {
+          "text": "Ask if she supports them",
+          "reply": "I support keeping people alive.",
+          "nextNode": "support"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "I gave you the truth. Now decide what to do with it.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "questions",
+      "text": "People who ask questions tend to disappear from forms very quickly.",
+      "answers": [
+        {
+          "text": "Ask if she is afraid",
+          "reply": "Constantly.",
+          "nextNode": "afraid"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "I should not have said this much.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "protests",
+      "text": "Hospitals treated injured workers. The administration did not like that.",
+      "answers": [
+        {
+          "text": "Ask if she was there",
+          "reply": "I saw enough blood to stop believing official reports.",
+          "nextNode": "blood"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "My clearance is valid. Please decide.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "office",
+      "text": "Most offices approve anything if the right stamp appears on the page.",
+      "answers": [
+        {
+          "text": "Ask if the documents are forged",
+          "reply": "I did not say that.",
+          "nextNode": "forged"
+        },
+        {
+          "text": "Proceed to decision",
+          "reply": "You have enough information.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "quietly",
+      "text": "I was not the first person they asked for help. I am only the first who came.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Let me pass, or stop me here.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "clinic",
+      "text": "If the system says you do not exist, the system does not treat you.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "That is why I am here.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "support",
+      "text": "If that is a crime now, then write it down.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "I am ready for your answer.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "afraid",
+      "text": "But fear is not a reason to let a child die.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Please make your decision.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "blood",
+      "text": "They called it a minor disturbance. We ran out of bandages before midnight.",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "I will not justify myself further.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "forged",
+      "text": "I said the code is valid. That is what your system cares about, is it not?",
+      "answers": [
+        {
+          "text": "Proceed to decision",
+          "reply": "Check the code and decide.",
+          "nextNode": "decision"
+        }
+      ]
+    },
+    {
+      "id": "decision",
+      "text": "Operator, I have given you my code and my reason. The child will not last the night without those supplies.",
+      "answers": [
+        {
+          "text": "Let her pass",
+          "reply": "Thank you. I will proceed through route B.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let her pass",
+          "reply": "Then I will turn back.",
+          "nextNode": ""
+        }
+      ]
+    }
+  ]
+}

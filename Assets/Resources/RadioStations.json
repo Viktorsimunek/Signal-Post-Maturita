@@ -1,0 +1,84 @@
+{
+  "stations": [
+    {
+      "name": "State Broadcast",
+      "text": "... thanks to the Chairman's expansion program, three more southern districts have been successfully stabilized ..."
+    },
+    {
+      "name": "Public Radio",
+      "text": "... Free Coast Radio has stopped transmitting after twenty years on air ... no official explanation has been released ..."
+    },
+    {
+      "name": "Weather Relay",
+      "text": "... dense fog moving through the western hills ... long-range visibility near zero ..."
+    },
+    {
+      "name": "Checkpoint North",
+      "text": "... papers verified ... proceed to secondary inspection ..."
+    },
+    {
+      "name": "Maintenance Channel",
+      "text": "... tower lights on sector C failed again during the night ..."
+    },
+    {
+      "name": "Civilian Frequency",
+      "text": "... train station's been closed for weeks now ... nobody even announces it anymore ..."
+    },
+    {
+      "name": "Emergency Channel",
+      "text": "... unidentified vehicle abandoned near border marker eight ..."
+    },
+    {
+      "name": "Music Station",
+      "text": "... due to new communication policies tonight's independent program will not continue ..."
+    },
+    {
+      "name": "Military Relay",
+      "text": "... convoy delayed by inspection teams ... awaiting clearance ..."
+    },
+    {
+      "name": "Late Night Radio",
+      "text": "... remember when people used to travel without permits? feels unreal now ..."
+    },
+    {
+      "name": "State Announcement",
+      "text": "... the Chairman will address the nation this Friday regarding recent international victories ..."
+    },
+    {
+      "name": "Town Dispatch",
+      "text": "... curfew violations decreasing for the fourth consecutive month ..."
+    },
+    {
+      "name": "Harbor Frequency",
+      "text": "... cargo inspections extended to all civilian deliveries entering the coast ..."
+    },
+    {
+      "name": "Old Broadcast Tape",
+      "text": "... this station is funded by listeners across the valley ... thank you for staying with us ..."
+    },
+    {
+      "name": "Internal Security",
+      "text": "... all operators are reminded that unsanctioned listening remains prohibited ..."
+    },
+    {
+      "name": "Railway Control",
+      "text": "... line seven remains inactive pending infrastructure repairs ..."
+    },
+    {
+      "name": "Local Radio",
+      "text": "... people gathered in the square again after the speech ... largest crowd in years ..."
+    },
+    {
+      "name": "Broken Frequency",
+      "text": "... [static] ... transmission source unavailable ..."
+    },
+    {
+      "name": "Border Patrol",
+      "text": "... inspection teams requested additional floodlights near the outer fence ..."
+    },
+    {
+      "name": "State Frequency",
+      "text": "... production targets exceeded once again under the Chairman's direction ..."
+    }
+  ]
+}
