@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 101}
+  - component: {fileID: 102}
+  m_Layer: 0
+  m_Name: Debug Fax
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &101
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7bc77ae52ef40b8836b20d3926d1c02, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  font: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  inkEffect: {fileID: 7200000, guid: 096006034f7e4b44b8e257a236f21429, type: 3}
+  title: INCOMING FAX
+  sender: 'FROM: SIGNAL CONTROL / 07'
+  message: "Transmission received.\n\nCheck the main power supply.\nKeep the receiver connected.\nWait for further instructions.\n\nEND OF MESSAGE"
+  inkBleed: 0.5
+  noise: 0.08
+  dropouts: 0.05
+  bleedRadius: 3
+  unevenInk: 0.469
+  ghosting: 0.272
+  warp: 2.21
+  rowJitter: 0.83
+  bandShift: 3.83
+  paperMottle: 0.05
+  edgeDirt: 0.139
+  streaks: 0.2095
+  paperTextureStrength: 0.181
+  paperSize: 0.84
+  damageStrength: 0.055
+  damageSize: 1
+  damageNoiseScale: 6
+  damageBreakup: 0.7
+  damageWarp: 0.12
+  threshold: 0.65
+  thresholdSoftness: 0.174
+  thresholdBlend: 0.96
+  seed: 158
+  ghostOffset: {x: 2, y: 1}
+  paperTexture: {fileID: 2800000, guid: 22eafc4333a786c42aded1c3ea440c4a, type: 3}
+  paperTiling: {x: 1, y: 1}
+  paperOffset: {x: 0, y: 0}
+  damageMask: {fileID: 2800000, guid: 9c325994b2314e743b4fb2073d90330d, type: 3}
+  damageTiling: {x: 2, y: 2}
+  damageOffset: {x: 0, y: 0}
+  randomizeDamagePlacement: 1
+  newSeedEachTime: 1
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 101}

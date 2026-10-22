@@ -1,0 +1,176 @@
+#pragma kernel ProcessFax
+
+// Vstup je čistý fax, výstup upravený fax. Nastavení posílá C# při přegenerování.
+Texture2D<float4> Source, PaperTexture, DamageMask;
+SamplerState sampler_linear_clamp;
+SamplerState sampler_linear_repeat;
+RWTexture2D<float4> Result;
+float InkBleed, Noise, Dropouts, UnevenInk, Ghosting;
+float Warp, RowJitter, BandShift, PaperMottle, EdgeDirt, Streaks;
+float PaperTextureStrength, DamageStrength;
+float2 PaperTiling, DamageTiling, PaperOffset, DamageOffset;
+float DamageNoiseScale, DamageBreakup, DamageWarp;
+float Threshold, ThresholdSoftness, ThresholdBlend;
+int RandomizeDamagePlacement;
+float2 GhostOffset;
+int BleedRadius;
+uint Seed;
+
+// Stejná pozice + seed = stejný vzor. Nepoužívám čas, fax se nehýbe.
+float Random(uint2 p)
+{
+    uint h = p.x * 374761393u + p.y * 668265263u + Seed * 1442695041u;
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return (h ^ (h >> 16)) / 4294967295.0;
+}
+
+// Plynulý šum pro papír a pohyb textu. Sousední pixely se posouvají podobně.
+float SmoothNoise(float2 p)
+{
+    uint2 cell = (uint2)floor(p);
+    float2 t = frac(p);
+    t = t * t * (3.0 - 2.0 * t);
+    return lerp(lerp(Random(cell), Random(cell + uint2(1, 0)), t.x),
+                lerp(Random(cell + uint2(0, 1)), Random(cell + uint2(1, 1)), t.x), t.y);
+}
+
+// Inkoust: 0 = bílý papír, 1 = černý tisk.
+float ReadInk(float2 p, float2 size, float2 texelSize)
+{
+    if (any(p < 0) || any(p > size - 1)) return 0; // Za okrajem je čistý papír.
+    return 1.0 - Source.SampleLevel(sampler_linear_clamp, (p + 0.5) * texelSize, 0).r;
+}
+
+float2 Gradient(int2 cell)
+{
+    float angle = Random(asuint(cell)) * 6.2831853;
+    float s, c;
+    sincos(angle, s, c);
+    return float2(c, s);
+}
+
+// Perlin pro rozbití damage do větších nepravidelných oblastí (0 až 1).
+float Perlin(float2 p)
+{
+    int2 cell = (int2)floor(p);
+    float2 f = frac(p);
+    float2 t = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+    float a = dot(Gradient(cell), f);
+    float b = dot(Gradient(cell + int2(1, 0)), f - float2(1, 0));
+    float c = dot(Gradient(cell + int2(0, 1)), f - float2(0, 1));
+    float d = dot(Gradient(cell + int2(1, 1)), f - float2(1, 1));
+    return saturate(0.5 + lerp(lerp(a, b, t.x), lerp(c, d, t.x), t.y));
+}
+
+[numthreads(8, 8, 1)]
+void ProcessFax(uint3 id : SV_DispatchThreadID)
+{
+    uint width, height;
+    Source.GetDimensions(width, height);
+    if (id.x >= width || id.y >= height) return;
+    float2 size = float2(width, height);
+    float2 texelSize = rcp(size);
+    float2 p = float2(id.xy);
+    float2 uv = (p + 0.5) * texelSize;
+
+    // 1. DISTORTION – zvlnění papíru, chvění řádků a občas posunutý pás.
+    // Vypnuté efekty přeskakuju; jejich šum není potřeba počítat.
+    float2 q = p;
+    if (Warp > 0)
+    {
+        float2 displacement = float2(SmoothNoise(p / 90.0), SmoothNoise(p / 90.0 + 137.0));
+        q += (displacement * 2.0 - 1.0) * Warp;
+    }
+    if (RowJitter > 0)
+        q.x += (Random(uint2(17, id.y)) * 2.0 - 1.0) * RowJitter;
+    uint band = id.y / 12;
+    if (BandShift > 0 && Random(uint2(43, band)) < 0.12)
+        q.x += (Random(uint2(97, band)) * 2.0 - 1.0) * BandShift;
+
+    // 2. INKOUST – rozpíjení do okolí, dvojitý otisk a slabší místa tisku.
+    float ink = ReadInk(q, size, texelSize);
+    if (InkBleed > 0)
+    {
+        // Rozpíjení nemůže být silnější než InkBleed. Tmavší pixel už nezmění.
+        [branch]
+        if (ink < InkBleed)
+        {
+            float nearbyInk = ink; // Střed už mám načtený.
+            int radius = clamp(BleedRadius, 1, 3);
+            for (int y = -radius; y <= radius; y++)
+                for (int x = -radius; x <= radius; x++)
+                    if (x != 0 || y != 0)
+                        nearbyInk += ReadInk(q + float2(x, y), size, texelSize);
+            nearbyInk /= (2 * radius + 1) * (2 * radius + 1);
+            ink = max(ink, nearbyInk * InkBleed * (0.35 + 0.65 * SmoothNoise(p / 6.0)));
+        }
+    }
+    if (Ghosting > 0)
+        ink = max(ink, ReadInk(q - GhostOffset, size, texelSize) * Ghosting);
+    if (UnevenInk > 0)
+        ink *= 1.0 - UnevenInk * SmoothNoise(p / 23.0 + 71.0);
+    if (Dropouts > 0 && Random(uint2(id.x / 3, id.y) + uint2(173, 719)) < Dropouts)
+        ink *= 0.35;
+
+    // 3. PAPÍR – fleky v podkladu, špinavé okraje, pruhy a jemné zrno.
+    float paper = 1.0;
+    if (PaperMottle > 0) paper -= SmoothNoise(p / 70.0 + 317.0) * PaperMottle;
+    float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
+    if (EdgeDirt > 0)
+        paper -= (1.0 - smoothstep(0.0, 0.07, edge)) * EdgeDirt * SmoothNoise(p / 12.0);
+    if (Streaks > 0)
+    {
+        float stripe = Random(uint2(id.x / 2, 853));
+        stripe *= stripe;
+        stripe *= stripe;
+        stripe *= stripe;
+        stripe *= stripe; // x^16: zvýrazní jen pár pruhů, bez obecné mocniny.
+        paper -= stripe * Streaks;
+    }
+    if (Noise > 0) paper -= Random(id.xy + uint2(991, 31)) * Noise;
+    float3 paperColor = 1.0;
+    if (PaperTextureStrength > 0)
+        paperColor = PaperTexture.SampleLevel(sampler_linear_repeat, uv * PaperTiling + PaperOffset, 0).rgb;
+
+    // 4. DAMAGE – otočím a posunu texturu, Perlinem ji zvlním a místy zeslabím.
+    // Repeat sampler opakuje texturu i mimo UV 0..1, včetně filtrování na švech.
+    float damage = 0;
+    if (DamageStrength > 0)
+    {
+        float2 damageUV = (uv - 0.5) * DamageTiling;
+        if (RandomizeDamagePlacement != 0)
+        {
+            float angle = Random(uint2(532, 97)) * 6.2831853;
+            float s, c;
+            sincos(angle, s, c);
+            damageUV = float2(c * damageUV.x - s * damageUV.y, s * damageUV.x + c * damageUV.y);
+            damageUV += float2(Random(uint2(33, 14)), Random(uint2(81, 62))) * 16.0;
+        }
+        damageUV += 0.5 + DamageOffset;
+        float coarse = 0.5, fine = 0.5;
+        if (DamageWarp > 0 || DamageBreakup > 0)
+        {
+            float2 noiseUV = (p + 0.5) * texelSize.y * DamageNoiseScale + 19.37;
+            coarse = Perlin(noiseUV);
+            fine = Perlin(noiseUV * 2.13 + 37.1);
+        }
+        damageUV += (float2(coarse, fine) * 2.0 - 1.0) * DamageWarp;
+        damage = 1.0 - DamageMask.SampleLevel(sampler_linear_repeat, damageUV, 0).r;
+        float patches = smoothstep(0.3, 0.7, coarse * 0.7 + fine * 0.3);
+        damage *= lerp(1.0, patches, DamageBreakup);
+    }
+
+    // 5. SLOŽENÍ – damage ztmaví papír, na něj přijde inkoust.
+    float3 value = saturate(paper * lerp(float3(1, 1, 1), paperColor, PaperTextureStrength)
+        - damage * DamageStrength) * (1.0 - saturate(ink));
+    // 6. THRESHOLD – převod na černou/bílou; blend vrací část původních odstínů.
+    if (ThresholdBlend > 0)
+    {
+        float gray = dot(value, float3(0.2126, 0.7152, 0.0722));
+        float bw = ThresholdSoftness <= 0.0001 ? step(Threshold, gray)
+            : smoothstep(Threshold - ThresholdSoftness, Threshold + ThresholdSoftness, gray);
+        value = lerp(value, float3(bw, bw, bw), ThresholdBlend);
+    }
+    Result[id.xy] = float4(value, 1);
+}
+
