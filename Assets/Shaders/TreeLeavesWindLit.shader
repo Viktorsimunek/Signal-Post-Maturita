@@ -195,6 +195,12 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             return output;
         }
 
+        // Keep the leaf silhouette identical in color, depth and shadow passes.
+        void ClipLeaf(half textureAlpha)
+        {
+            clip(textureAlpha * _BaseColor.a - _Cutoff);
+        }
+
         half4 LeafFragment(Varyings input) : SV_Target
         {
             UNITY_SETUP_INSTANCE_ID(input);
@@ -205,13 +211,85 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         #endif
 
             half4 albedoAlpha = SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
-            half alpha = AlphaDiscard(albedoAlpha.a * _BaseColor.a, _Cutoff);
+            ClipLeaf(albedoAlpha.a);
             half3 albedo = albedoAlpha.rgb * _BaseColor.rgb;
             half3 emission = SampleEmission(input.uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
             half3 color = albedo * input.lighting + emission;
             color = MixFog(color, input.fogFactor);
-            return half4(color, alpha);
+            return half4(color, 1.0h);
         }
+
+        struct DepthVaryings
+        {
+            float2 uv : TEXCOORD0;
+            float3 normalWS : TEXCOORD1;
+            float4 positionCS : SV_POSITION;
+            UNITY_VERTEX_INPUT_INSTANCE_ID
+            UNITY_VERTEX_OUTPUT_STEREO
+        };
+
+        DepthVaryings LeafDepthVertex(Attributes input)
+        {
+            DepthVaryings output = (DepthVaryings)0;
+            UNITY_SETUP_INSTANCE_ID(input);
+            UNITY_TRANSFER_INSTANCE_ID(input, output);
+            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+            float3 positionWS = ApplyLeafWind(input.positionOS.xyz, input.texcoord, input.color);
+            output.positionCS = TransformWorldToHClip(positionWS);
+            output.normalWS = GetBillboardLightingNormal(positionWS);
+            output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+            return output;
+        }
+
+        DepthVaryings LeafShadowVertex(Attributes input)
+        {
+            DepthVaryings output = LeafDepthVertex(input);
+            UNITY_SETUP_INSTANCE_ID(input);
+            float3 positionWS = ApplyLeafWind(input.positionOS.xyz, input.texcoord, input.color);
+            float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
+            #if _CASTING_PUNCTUAL_LIGHT_SHADOW
+                float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+            #else
+                float3 lightDirectionWS = _LightDirection;
+            #endif
+            output.positionCS = TransformWorldToHClip(
+                ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+            output.positionCS = ApplyShadowClamping(output.positionCS);
+            return output;
+        }
+
+        void ClipLeafDepth(DepthVaryings input)
+        {
+            #if defined(LOD_FADE_CROSSFADE)
+                LODFadeCrossFade(input.positionCS);
+            #endif
+            ClipLeaf(SampleAlbedoAlpha(input.uv,
+                TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a);
+        }
+
+        half4 LeafDepthFragment(DepthVaryings input) : SV_Target
+        {
+            UNITY_SETUP_INSTANCE_ID(input);
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+            ClipLeafDepth(input);
+            return 0;
+        }
+
+        half4 LeafNormalsFragment(DepthVaryings input) : SV_Target
+        {
+            UNITY_SETUP_INSTANCE_ID(input);
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+            ClipLeafDepth(input);
+            float3 normalWS = NormalizeNormalPerPixel(input.normalWS);
+            #if defined(_GBUFFER_NORMALS_OCT)
+                float2 packed = saturate(PackNormalOctQuadEncode(normalWS) * 0.5 + 0.5);
+                return half4(PackFloat2To888(packed), 0.0);
+            #else
+                return half4(normalWS, 0.0);
+            #endif
+        }
+
         ENDHLSL
 
         Pass
@@ -222,7 +300,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             Blend One Zero
             ZWrite On
             Cull Off
-            AlphaToMask On
+            AlphaToMask Off
 
             HLSLPROGRAM
             #pragma vertex LeafVertex
@@ -237,8 +315,61 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             ENDHLSL
         }
 
-        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
-        UsePass "Universal Render Pipeline/Lit/DepthOnly"
-        UsePass "Universal Render Pipeline/Lit/DepthNormals"
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode" = "ShadowCaster" }
+            ZWrite On
+            ZTest LEqual
+            Cull Off
+            AlphaToMask Off
+            ColorMask 0
+
+            HLSLPROGRAM
+            #pragma vertex LeafShadowVertex
+            #pragma fragment LeafDepthFragment
+            #pragma multi_compile _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_instancing
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "DepthOnly"
+            Tags { "LightMode" = "DepthOnly" }
+            ZWrite On
+            ZTest LEqual
+            Cull Off
+            AlphaToMask Off
+            ColorMask R
+
+            HLSLPROGRAM
+            #pragma vertex LeafDepthVertex
+            #pragma fragment LeafDepthFragment
+            #pragma multi_compile _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_instancing
+            
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "DepthNormals"
+            Tags { "LightMode" = "DepthNormals" }
+            ZWrite On
+            ZTest LEqual
+            Cull Off
+            AlphaToMask Off
+            ColorMask RGBA
+
+            HLSLPROGRAM
+            #pragma vertex LeafDepthVertex
+            #pragma fragment LeafNormalsFragment
+            #pragma multi_compile _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_instancing
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            ENDHLSL
+        }
     }
 }

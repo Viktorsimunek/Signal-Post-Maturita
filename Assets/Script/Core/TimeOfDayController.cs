@@ -23,6 +23,18 @@ public class TimeOfDayController : MonoBehaviour
     private static readonly int LightningDoubleId = Shader.PropertyToID("_LightningDouble");
     private static readonly int LightningIntensityId = Shader.PropertyToID("_LightningIntensity");
 
+    private static readonly int CloudWeatherId = Shader.PropertyToID("_CloudWeather");
+    private static readonly int CloudHazeColorId = Shader.PropertyToID("_CloudHazeColor");
+
+    [Header("Clouds")]
+    [SerializeField] private bool syncClouds = true;
+    [Min(0f)]
+    [SerializeField] private float clearCloudDensity = 1f;
+    [Min(0f)]
+    [SerializeField] private float stormCloudDensity = 1.6f;
+    [Range(0f, 0.5f)]
+    [SerializeField] private float stormCloudCoverage = 0.12f;
+
     [Header("Skybox")]
     [SerializeField] private Material skyboxMaterial;
     [SerializeField] private bool useRenderSettingsSkybox = true;
@@ -176,6 +188,7 @@ public class TimeOfDayController : MonoBehaviour
     {
         if (targetMaterial == null)
         {
+            Shader.SetGlobalVector(CloudWeatherId, Vector4.zero);
             return;
         }
 
@@ -212,11 +225,39 @@ public class TimeOfDayController : MonoBehaviour
         SyncFogSettings();
         SyncAmbientLighting();
         SyncStormLight();
+        SyncClouds();
 
         if ((changed || forceEnvironmentUpdate) && updateEnvironmentLighting)
         {
             DynamicGI.UpdateEnvironment();
         }
+    }
+
+    private void OnDisable()
+    {
+        Shader.SetGlobalVector(CloudWeatherId, Vector4.zero);
+    }
+
+    private void SyncClouds()
+    {
+        if (!syncClouds)
+        {
+            Shader.SetGlobalVector(CloudWeatherId, Vector4.zero);
+            return;
+        }
+
+        // Weather can use SetStorm and SetLightning; materials keep their base values.
+        float density = Mathf.Lerp(clearCloudDensity, stormCloudDensity, stormAmount);
+        Shader.SetGlobalVector(CloudWeatherId,
+            new Vector4(1f, density, -stormCloudCoverage * stormAmount, 0f));
+
+        float altitude;
+        float azimuth;
+        CalculateSunDirection(timeOfDay, out altitude, out azimuth);
+        Color haze = EvaluateFogColor(EvaluateDayWeight(altitude), altitude);
+        if (QualitySettings.activeColorSpace == ColorSpace.Linear)
+            haze = haze.linear;
+        Shader.SetGlobalColor(CloudHazeColorId, haze);
     }
 
     private void SyncSunLight()

@@ -113,7 +113,7 @@ Material:
     - _SunMaxAltDeg: 85
     - _SunSizeDeg: 2
     - _SunSizeMul: 7.7
-    - _Time01: 0.728
+    - _Time01: 0.541
     - _Twilight: 0.18
     - _UsePSXQuantize: 0
     m_Colors:
