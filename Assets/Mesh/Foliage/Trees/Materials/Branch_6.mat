@@ -121,6 +121,9 @@ Material:
     - _GustStrength: 0.045
     - _HalfOverCutoff: 1
     - _LeafSaturation: 0.55
+    - _LocalLightFadeEnd: 45
+    - _LocalLightFadeStart: 30
+    - _LocalLightStrength: 1
     - _Metallic: 0
     - _MinNdotL: 0.2
     - _Mode: 0

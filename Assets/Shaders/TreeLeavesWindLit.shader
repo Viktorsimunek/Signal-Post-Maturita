@@ -32,6 +32,11 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         // Terrain supplies these values during its 3D-to-billboard transition.
         [HideInInspector] _SquashAmount("Terrain Billboard Morph", Float) = 1
 
+        [Header(Nearby Point And Spot Lights)]
+        _LocalLightStrength("Local Light Strength", Range(0, 2)) = 1
+        _LocalLightFadeStart("Local Light Fade Start", Float) = 30
+        _LocalLightFadeEnd("Local Light Fade End", Float) = 45
+
         [Header(Wind)]
         _WindFadeStart("Wind Detail Fade Start", Float) = 30
         _WindFadeEnd("Wind Detail Fade End", Float) = 130
@@ -74,7 +79,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         LOD 300
 
         HLSLINCLUDE
-        #pragma target 2.0
+        #pragma target 3.5
 
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -105,6 +110,9 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             half _MinNdotL;
             half _CameraFacingNormal;
             float4 _NormalDirection;
+            half _LocalLightStrength;
+            float _LocalLightFadeStart;
+            float _LocalLightFadeEnd;
             float _WindFadeStart;
             float _WindFadeEnd;
             float4 _WindDirection;
@@ -144,6 +152,8 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             half3 lighting : TEXCOORD1;
             half fogFactor : TEXCOORD2;
             float3 crownPositionOS : TEXCOORD3;
+            float3 positionWS : TEXCOORD4;
+            half3 normalWS : TEXCOORD5;
             float4 positionCS : SV_POSITION;
             UNITY_VERTEX_INPUT_INSTANCE_ID
             UNITY_VERTEX_OUTPUT_STEREO
@@ -221,7 +231,6 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             float4 shadowCoord = TransformWorldToShadowCoord(deformedPositionWS);
             Light mainLight = GetMainLight(shadowCoord);
             half3 bakedGI = SampleSH(lightingNormalWS);
-            half3 vertexAdditional = VertexLighting(deformedPositionWS, lightingNormalWS) * 0.5h;
             half ndotl = max(abs(dot(lightingNormalWS, mainLight.direction)), _MinNdotL);
             half shadowAtten = lerp(1.0h, mainLight.shadowAttenuation, _ShadowStrength);
             half3 directLighting = mainLight.color * (ndotl * _DirectLightStrength + _BackLightStrength) * shadowAtten;
@@ -229,10 +238,57 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
 
             output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
             output.positionCS = positionCS;
-            output.lighting = max(ambientLighting + directLighting + vertexAdditional, _AmbientStrength.xxx * 0.35h);
+            output.lighting = max(ambientLighting + directLighting, _AmbientStrength.xxx * 0.35h);
             output.fogFactor = ComputeFogFactor(positionCS.z);
             output.crownPositionOS = input.positionOS.xyz;
+            output.positionWS = deformedPositionWS;
+            output.normalWS = TransformObjectToWorldNormal(input.normalOS);
             return output;
+        }
+
+        half3 NearbyLeafLighting(Varyings input)
+        {
+            half3 lighting = half3(0, 0, 0);
+            #if defined(_ADDITIONAL_LIGHTS) || defined(_ADDITIONAL_LIGHTS_VERTEX) || USE_CLUSTER_LIGHT_LOOP
+                float fadeEnd = max(0.0, _LocalLightFadeEnd);
+                float fadeStart = clamp(_LocalLightFadeStart, 0.0, max(0.0, fadeEnd - 0.01));
+                float3 cameraOffset = input.positionWS - GetCameraPositionWS();
+                float distanceSq = dot(cameraOffset, cameraOffset);
+                // A real branch skips light lists, cookies and shadow maps beyond the limit.
+                UNITY_BRANCH
+                if (distanceSq < fadeEnd * fadeEnd && _LocalLightStrength > 0.0h)
+                {
+                    half fade = 1.0h - smoothstep(fadeStart * fadeStart,
+                        max(fadeStart * fadeStart + 0.0001, fadeEnd * fadeEnd), distanceSq);
+                    half3 normalWS = NormalizeNormalPerPixel(input.normalWS);
+                    // Forward+/Deferred+ light iteration requires these two InputData fields.
+                    InputData inputData = (InputData)0;
+                    inputData.positionWS = input.positionWS;
+                    inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
+                    #if defined(_LIGHT_LAYERS)
+                        uint meshRenderingLayers = GetMeshRenderingLayer();
+                    #endif
+                    uint lightCount = GetAdditionalLightsCount();
+                    LIGHT_LOOP_BEGIN(lightCount)
+                        Light light = GetAdditionalLight(lightIndex, input.positionWS);
+                        bool affectsLeaf = light.distanceAttenuation > 0.0;
+                        #if defined(_LIGHT_LAYERS)
+                            affectsLeaf = affectsLeaf && IsMatchingLightLayer(light.layerMask, meshRenderingLayers);
+                        #endif
+                        UNITY_BRANCH
+                        if (affectsLeaf)
+                        {
+                            // Only lit fragments pay for additional shadow / cookie sampling.
+                            light = GetAdditionalLight(lightIndex, input.positionWS, unity_ProbesOcclusion);
+                            half diffuse = lerp(0.15h, 1.0h, saturate(abs(dot(normalWS, light.direction))));
+                            lighting += light.color * (light.distanceAttenuation *
+                                light.shadowAttenuation * diffuse);
+                        }
+                    LIGHT_LOOP_END
+                    lighting *= fade * _LocalLightStrength;
+                }
+            #endif
+            return lighting;
         }
 
         // Keep the leaf silhouette identical in color, depth and shadow passes.
@@ -255,7 +311,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             half3 albedo = MuteTreeLeafColor(albedoAlpha.rgb * _BaseColor.rgb) *
                 _TreeInstanceColor.rgb * GetTreeCrownTint(input.crownPositionOS);
             half3 emission = SampleEmission(input.uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
-            half3 color = albedo * input.lighting + emission;
+            half3 color = albedo * (input.lighting + NearbyLeafLighting(input)) + emission;
             color = MixFog(color, input.fogFactor);
             return half4(color, 1.0h);
         }
@@ -351,7 +407,11 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             #pragma fragment LeafFragment
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _LIGHT_COOKIES
+            #pragma multi_compile_fragment _ _LIGHT_LAYERS
             #pragma multi_compile _ LOD_FADE_CROSSFADE
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #pragma multi_compile_instancing
