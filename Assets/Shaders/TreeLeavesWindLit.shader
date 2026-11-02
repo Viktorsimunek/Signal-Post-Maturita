@@ -20,7 +20,21 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         _CameraFacingNormal("Camera Facing Normal", Range(0.0, 1.0)) = 0.75
         _NormalDirection("Fixed Normal Direction", Vector) = (0, 1, 0, 0)
 
+        _LeafSaturation("Leaf Color Saturation", Range(0, 1)) = 0.55
+
+        [Header(Crown Depth)]
+        _CrownShadeStrength("Crown Center Darkening", Range(0, 0.8)) = 0.32
+        _CrownInnerTint("Crown Inner Tint", Color) = (0.92, 0.98, 0.9, 1)
+        [HideInInspector] _CrownShape("Crown Radius Base InvHeight Taper", Vector) = (3, 0, 0.1, 0.45)
+
+        [HideInInspector] _TreeInstanceColor("Terrain Tree Color", Color) = (1,1,1,1)
+
+        // Terrain supplies these values during its 3D-to-billboard transition.
+        [HideInInspector] _SquashAmount("Terrain Billboard Morph", Float) = 1
+
         [Header(Wind)]
+        _WindFadeStart("Wind Detail Fade Start", Float) = 30
+        _WindFadeEnd("Wind Detail Fade End", Float) = 130
         _WindDirection("Wind Direction", Vector) = (1, 0, 0.25, 0)
         _WindStrength("Wind Strength", Range(0.0, 0.4)) = 0.08
         _WindSpeed("Wind Speed", Range(0.0, 6.0)) = 1.35
@@ -66,7 +80,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
+        #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
         #if defined(LOD_FADE_CROSSFADE)
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
@@ -77,6 +91,10 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             half4 _BaseColor;
             half4 _SpecColor;
             half4 _EmissionColor;
+            half _LeafSaturation;
+            half _CrownShadeStrength;
+            half4 _CrownInnerTint;
+            float4 _CrownShape;
             half _Cutoff;
             half _BumpScale;
             half _Smoothness;
@@ -87,6 +105,8 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             half _MinNdotL;
             half _CameraFacingNormal;
             float4 _NormalDirection;
+            float _WindFadeStart;
+            float _WindFadeEnd;
             float4 _WindDirection;
             half _WindStrength;
             half _WindSpeed;
@@ -99,6 +119,10 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             half _VertexColorInfluence;
         CBUFFER_END
 
+        #include "Assets/Shaders/TreeCrownShading.hlsl"
+        half4 _TreeInstanceColor;
+        float _SquashAmount;
+        float4 _SquashPlaneNormal;
         float3 _LightDirection;
         float3 _LightPosition;
 
@@ -119,6 +143,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             float2 uv : TEXCOORD0;
             half3 lighting : TEXCOORD1;
             half fogFactor : TEXCOORD2;
+            float3 crownPositionOS : TEXCOORD3;
             float4 positionCS : SV_POSITION;
             UNITY_VERTEX_INPUT_INSTANCE_ID
             UNITY_VERTEX_OUTPUT_STEREO
@@ -126,33 +151,47 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
 
         float3 ApplyLeafWind(float3 positionOS, float2 uv, float4 color)
         {
+            // Match Terrain's projection into the billboard plane. Outside Terrain,
+            // the plane is zero and the original mesh remains unchanged.
+            positionOS -= _SquashPlaneNormal.xyz *
+                (dot(_SquashPlaneNormal.xyz, positionOS) + _SquashPlaneNormal.w) *
+                (1.0 - saturate(_SquashAmount));
             float3 positionWS = TransformObjectToWorld(positionOS);
 
-            float2 dir = _WindDirection.xz;
-            float dirLengthSq = max(dot(dir, dir), 1e-4);
-            dir *= rsqrt(dirLengthSq);
-            float2 sideDir = float2(-dir.y, dir.x);
+            // Far trees are static; skip sine/pow work beyond the transition.
+            float distanceToCamera = distance(GetCameraPositionWS(), positionWS);
+            float windDetail = 1.0 - smoothstep(_WindFadeStart,
+                max(_WindFadeStart + 1.0, _WindFadeEnd), distanceToCamera);
+            UNITY_BRANCH
+            if (windDetail > 0.0)
+            {
+                float2 dir = _WindDirection.xz;
+                float dirLengthSq = max(dot(dir, dir), 1e-4);
+                dir *= rsqrt(dirLengthSq);
+                float2 sideDir = float2(-dir.y, dir.x);
 
-            float uvMask = pow(saturate(uv.y), _WindMaskPower);
-            float vertexMask = saturate(max(color.r, color.a));
-            float windMask = saturate(max(uvMask, vertexMask * _VertexColorInfluence));
+                float uvMask = pow(saturate(uv.y), _WindMaskPower);
+                float vertexMask = saturate(max(color.r, color.a));
+                float windMask = saturate(max(uvMask, vertexMask * _VertexColorInfluence));
 
-            float time = _Time.y * _WindSpeed;
-            float phase = dot(positionWS.xz, dir * _WindSpatialFrequency) + dot(positionWS.xz, float2(0.17, -0.11));
+                float time = _Time.y * _WindSpeed;
+                float phase = dot(positionWS.xz, dir * _WindSpatialFrequency) + dot(positionWS.xz, float2(0.17, -0.11));
 
-            float swayA = sin(time + phase);
-            float swayB = sin(time * 1.73 - phase * 1.37) * 0.5;
-            float gust = (sin(time * _GustFrequency + phase * 0.43) * 0.5 + 0.5) * _GustStrength;
-            float edgeMask = saturate(abs(uv.x - 0.5) * 2.0);
-            float flutter = sin(time * 2.9 + uv.x * 11.0 + positionWS.y * 0.65 + phase * 1.8) * _EdgeFlutter * edgeMask;
+                float swayA = sin(time + phase);
+                float swayB = sin(time * 1.73 - phase * 1.37) * 0.5;
+                float gust = (sin(time * _GustFrequency + phase * 0.43) * 0.5 + 0.5) * _GustStrength;
+                float edgeMask = saturate(abs(uv.x - 0.5) * 2.0);
+                float flutter = sin(time * 2.9 + uv.x * 11.0 + positionWS.y * 0.65 + phase * 1.8) * _EdgeFlutter * edgeMask;
 
-            float mainDisplacement = (swayA + swayB) * (_WindStrength + gust) * windMask;
-            float sideDisplacement = flutter * windMask;
-            float verticalDisplacement = (swayA * 0.35 + swayB * 0.2 + flutter * 0.5) * _VerticalInfluence * windMask;
+                windMask *= windDetail;
+                float mainDisplacement = (swayA + swayB) * (_WindStrength + gust) * windMask;
+                float sideDisplacement = flutter * windMask;
+                float verticalDisplacement = (swayA * 0.35 + swayB * 0.2 + flutter * 0.5) * _VerticalInfluence * windMask;
 
-            positionWS.xz += dir * mainDisplacement;
-            positionWS.xz += sideDir * sideDisplacement;
-            positionWS.y += verticalDisplacement;
+                positionWS.xz += dir * mainDisplacement;
+                positionWS.xz += sideDir * sideDisplacement;
+                positionWS.y += verticalDisplacement;
+            }
             return positionWS;
         }
 
@@ -192,6 +231,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             output.positionCS = positionCS;
             output.lighting = max(ambientLighting + directLighting + vertexAdditional, _AmbientStrength.xxx * 0.35h);
             output.fogFactor = ComputeFogFactor(positionCS.z);
+            output.crownPositionOS = input.positionOS.xyz;
             return output;
         }
 
@@ -212,7 +252,8 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
 
             half4 albedoAlpha = SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
             ClipLeaf(albedoAlpha.a);
-            half3 albedo = albedoAlpha.rgb * _BaseColor.rgb;
+            half3 albedo = MuteTreeLeafColor(albedoAlpha.rgb * _BaseColor.rgb) *
+                _TreeInstanceColor.rgb * GetTreeCrownTint(input.crownPositionOS);
             half3 emission = SampleEmission(input.uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
             half3 color = albedo * input.lighting + emission;
             color = MixFog(color, input.fogFactor);
@@ -244,8 +285,11 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
 
         DepthVaryings LeafShadowVertex(Attributes input)
         {
-            DepthVaryings output = LeafDepthVertex(input);
+            DepthVaryings output = (DepthVaryings)0;
             UNITY_SETUP_INSTANCE_ID(input);
+            UNITY_TRANSFER_INSTANCE_ID(input, output);
+            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+            output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
             float3 positionWS = ApplyLeafWind(input.positionOS.xyz, input.texcoord, input.color);
             float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
             #if _CASTING_PUNCTUAL_LIGHT_SHADOW
@@ -273,7 +317,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             UNITY_SETUP_INSTANCE_ID(input);
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
             ClipLeafDepth(input);
-            return 0;
+            return half4(input.positionCS.z, 0.0, 0.0, 0.0);
         }
 
         half4 LeafNormalsFragment(DepthVaryings input) : SV_Target
@@ -295,7 +339,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         Pass
         {
             Name "ForwardLit"
-            Tags { "LightMode" = "UniversalForward" }
+            Tags { "LightMode" = "UniversalForwardOnly" }
 
             Blend One Zero
             ZWrite On
@@ -309,7 +353,6 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX
             #pragma multi_compile _ LOD_FADE_CROSSFADE
-            #pragma multi_compile_fog
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #pragma multi_compile_instancing
             ENDHLSL
@@ -356,7 +399,7 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
         Pass
         {
             Name "DepthNormals"
-            Tags { "LightMode" = "DepthNormals" }
+            Tags { "LightMode" = "DepthNormalsOnly" }
             ZWrite On
             ZTest LEqual
             Cull Off
@@ -372,4 +415,6 @@ Shader "Custom/Foliage/Tree Leaves Wind Lit"
             ENDHLSL
         }
     }
+    Dependency "BillboardShader" = "Hidden/SignalPost/Tree Leaves Billboard Bake"
+
 }

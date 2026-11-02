@@ -2721,6 +2721,75 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &64172373
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1028.5764
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 107.94269
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2361.5112
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1041.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 93.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1060.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1770209512940249606, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8008379125360058079, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
+      propertyPath: m_Name
+      value: Fog
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0848fa228feb38543b997cdc6d5324ac, type: 3}
 --- !u!1 &65520035
 GameObject:
   m_ObjectHideFlags: 0
@@ -3770,10 +3839,10 @@ Terrain:
   m_Enabled: 1
   serializedVersion: 6
   m_TerrainData: {fileID: 15600000, guid: 1531575db0f01a24288825517d62d0e5, type: 2}
-  m_TreeDistance: 775
-  m_TreeBillboardDistance: 78
-  m_TreeCrossFadeLength: 58.6
-  m_TreeMaximumFullLODCount: 7324
+  m_TreeDistance: 650
+  m_TreeBillboardDistance: 190
+  m_TreeCrossFadeLength: 120
+  m_TreeMaximumFullLODCount: 2048
   m_DetailObjectDistance: 82
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 5
@@ -55233,10 +55302,10 @@ Terrain:
   m_Enabled: 1
   serializedVersion: 6
   m_TerrainData: {fileID: 15600000, guid: 87ac13a995f3fcc4d879431aa21a8f65, type: 2}
-  m_TreeDistance: 775
-  m_TreeBillboardDistance: 78
-  m_TreeCrossFadeLength: 58.6
-  m_TreeMaximumFullLODCount: 7324
+  m_TreeDistance: 650
+  m_TreeBillboardDistance: 190
+  m_TreeCrossFadeLength: 120
+  m_TreeMaximumFullLODCount: 2048
   m_DetailObjectDistance: 82
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 24.3
@@ -84905,3 +84974,4 @@ SceneRoots:
   - {fileID: 1717127594}
   - {fileID: 1277452693}
   - {fileID: 1829599510}
+  - {fileID: 64172373}

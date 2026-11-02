@@ -24,9 +24,9 @@ Material:
   m_Shader: {fileID: 4800000, guid: 677c783d2d4e5824ca4c1fb7b2ff9839, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _ALPHATEST_ON
+  m_ValidKeywords: []
   m_InvalidKeywords:
+  - _ALPHATEST_ON
   - _SPECULAR_SETUP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -101,18 +101,21 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AO: 0
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 1
     - _AlphaMode: 1
     - _AlphaToMask: 1
     - _AmbientStrength: 0.45
     - _BackLightStrength: 0.35
+    - _BaseLight: 0.8
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
-    - _CameraFacingNormal: 0.75
+    - _CameraFacingNormal: 0.25
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
+    - _CrownShadeStrength: 0.55
     - _Cull: 0
     - _Cutoff: 0.052
     - _DetailAlbedoMapScale: 1
@@ -129,10 +132,13 @@ Material:
     - _GlossyReflections: 1
     - _GustFrequency: 0.55
     - _GustStrength: 0.045
+    - _HalfOverCutoff: 1
+    - _LeafSaturation: 0.55
     - _Metallic: 0
     - _MinNdotL: 0.2
     - _Mode: 0
     - _NormalStrength: 1
+    - _Occlusion: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
@@ -147,6 +153,7 @@ Material:
     - _SpecularHighlights: 1
     - _SpecularIntensity: 0.15
     - _SpecularPower: 16
+    - _SquashAmount: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
@@ -156,6 +163,8 @@ Material:
     - _UseVertexColor: 0
     - _VertexColorInfluence: 0.5
     - _VerticalInfluence: 0.025
+    - _WindFadeEnd: 130
+    - _WindFadeStart: 30
     - _WindMaskPower: 1.5
     - _WindSpatialFrequency: 0.22
     - _WindSpeed: 1.35
@@ -166,9 +175,13 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _CrownInnerTint: {r: 0.85, g: 0.95, b: 0.8, a: 1}
+    - _CrownShape: {r: 3, g: 0, b: 0.1, a: 0.45}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _NormalDirection: {r: 0, g: 1, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _TreeInstanceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TreeInstanceScale: {r: 1, g: 1, b: 1, a: 1}
     - _WindDirection: {r: 1, g: 0, b: 0.25, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

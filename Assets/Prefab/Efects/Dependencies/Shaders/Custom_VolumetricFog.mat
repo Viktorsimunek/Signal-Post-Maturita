@@ -32,21 +32,28 @@ Material:
     m_Ints: []
     m_Floats:
     - _Absorption: 0.65
+    - _AtmosphereBlend: 0.65
+    - _BodyContrast: 0
     - _BottomCutEnabled: 1
     - _BottomCutFade: 0.0717
     - _BottomCutHeight: 0.207
     - _Brightness: 1.13
     - _CloudScale: 171.4
-    - _Coverage: 0.117
+    - _Coverage: 0.045
     - _Cull: 1
-    - _Density: 0.71
+    - _Density: 0.06
+    - _DistanceFadeEnd: 0
+    - _DistanceFadeStart: 600
     - _DitherMode: 1
     - _EdgeFade: 0.43
     - _HeightBottom: 1.528
+    - _HeightShading: 0
     - _HeightTop: 0.77
-    - _NoiseScale: 1.87
+    - _NoiseScale: 0.78
+    - _SilverLining: 0
     - _Softness: 0.395
     - _Steps: 24.1
+    - _UseCloudWeather: 0
     - _WindSpeed: 0.02
     - _WorldSpace: 1
     m_Colors:

@@ -28,10 +28,92 @@ Shader "SignalPost/Fog Piercing Lit Emission"
             "RenderType" = "Opaque"
         }
 
+
+        // Keep the material layout identical in every pass (SRP Batcher).
+        HLSLINCLUDE
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        TEXTURE2D(_BaseMap);
+        SAMPLER(sampler_BaseMap);
+        TEXTURE2D(_EmissionMap);
+        SAMPLER(sampler_EmissionMap);
+
+        CBUFFER_START(UnityPerMaterial)
+            float4 _BaseMap_ST;
+            half4 _BaseColor;
+            half4 _EmissionColor;
+            half _EmissionIntensity;
+            half _LightOnAmount;
+            half _LightRandomness;
+            half _LightRandomGrid;
+            half _LightEdgeSoftness;
+            half _LightOffEmission;
+            half _LightRandomSeed;
+            half _EmissionShadowDimmer;
+            half _FogAffectsEmission;
+            half _AlphaClip;
+            half _Cutoff;
+        CBUFFER_END
+
+        struct DepthAttributes
+        {
+            float4 positionOS : POSITION;
+            float3 normalOS : NORMAL;
+            float2 uv : TEXCOORD0;
+        };
+
+        struct DepthVaryings
+        {
+            float4 positionCS : SV_POSITION;
+            float2 uv : TEXCOORD0;
+            float3 normalWS : TEXCOORD1;
+        };
+
+        DepthVaryings DepthVert(DepthAttributes input)
+        {
+            DepthVaryings output;
+            output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+            output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+            output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+            return output;
+        }
+
+        void ClipDepthAlpha(float2 uv)
+        {
+            if (_AlphaClip > 0.5h)
+            {
+                half alpha = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv).a * _BaseColor.a;
+                clip(alpha - _Cutoff);
+            }
+        }
+
+        half DepthFrag(DepthVaryings input) : SV_Target
+        {
+            ClipDepthAlpha(input.uv);
+            return input.positionCS.z;
+        }
+
+        half4 DepthNormalsFrag(DepthVaryings input) : SV_Target
+        {
+            ClipDepthAlpha(input.uv);
+            float3 normalWS = normalize(input.normalWS);
+            #if defined(_GBUFFER_NORMALS_OCT)
+                float2 octNormalWS = PackNormalOctQuadEncode(normalWS);
+                half3 packedNormalWS = PackFloat2To888(saturate(octNormalWS * 0.5 + 0.5));
+                return half4(packedNormalWS, 0.0);
+            #else
+                return half4(normalWS, 0.0);
+            #endif
+        }
+        ENDHLSL
+
         Pass
         {
             Name "UniversalForward"
-            Tags { "LightMode" = "UniversalForward" }
+            Tags { "LightMode" = "UniversalForwardOnly" }
+
+            ZWrite On
+            ZTest LEqual
+            Blend One Zero
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -44,27 +126,7 @@ Shader "SignalPost/Fog Piercing Lit Emission"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            TEXTURE2D(_BaseMap);
-            SAMPLER(sampler_BaseMap);
-            TEXTURE2D(_EmissionMap);
-            SAMPLER(sampler_EmissionMap);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
-                half4 _BaseColor;
-                half4 _EmissionColor;
-                half _EmissionIntensity;
-                half _LightOnAmount;
-                half _LightRandomness;
-                half _LightRandomGrid;
-                half _LightEdgeSoftness;
-                half _LightOffEmission;
-                half _LightRandomSeed;
-                half _EmissionShadowDimmer;
-                half _FogAffectsEmission;
-                half _AlphaClip;
-                half _Cutoff;
-            CBUFFER_END
 
             float Hash21(float2 value)
             {
@@ -181,6 +243,36 @@ Shader "SignalPost/Fog Piercing Lit Emission"
             ENDHLSL
         }
 
+
+        // Fog sampling _CameraDepthTexture must see these surfaces in prepasses.
+        Pass
+        {
+            Name "DepthOnly"
+            Tags { "LightMode" = "DepthOnly" }
+            ZWrite On
+            ZTest LEqual
+            ColorMask R
+
+            HLSLPROGRAM
+            #pragma vertex DepthVert
+            #pragma fragment DepthFrag
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "DepthNormalsOnly"
+            Tags { "LightMode" = "DepthNormalsOnly" }
+            ZWrite On
+            ZTest LEqual
+
+            HLSLPROGRAM
+            #pragma vertex DepthVert
+            #pragma fragment DepthNormalsFrag
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            ENDHLSL
+        }
+
         Pass
         {
             Name "ShadowCaster"
@@ -194,25 +286,7 @@ Shader "SignalPost/Fog Piercing Lit Emission"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            TEXTURE2D(_BaseMap);
-            SAMPLER(sampler_BaseMap);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
-                half4 _BaseColor;
-                half4 _EmissionColor;
-                half _EmissionIntensity;
-                half _LightOnAmount;
-                half _LightRandomness;
-                half _LightRandomGrid;
-                half _LightEdgeSoftness;
-                half _LightOffEmission;
-                half _LightRandomSeed;
-                half _EmissionShadowDimmer;
-                half _FogAffectsEmission;
-                half _AlphaClip;
-                half _Cutoff;
-            CBUFFER_END
 
             struct Attributes
             {
