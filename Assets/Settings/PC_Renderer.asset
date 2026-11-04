@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: NiidaeCustomEffectsRendererFeature
   m_EditorClassIdentifier: Assembly-CSharp::NiidaeCustomEffectsRendererFeature
   m_Active: 1
-  m_EnableInSceneView: 1
+  m_EnableInSceneView: 0
   m_EffectOrder: 000000000100000002000000030000000400000005000000060000000700000008000000
   m_EffectConfigs:
   - effect: 0

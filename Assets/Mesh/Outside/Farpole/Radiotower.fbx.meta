@@ -3,7 +3,12 @@ guid: 3914b6e230e14684b91af5cc920ba5bb
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: RadioTower.008
+    second: {fileID: 2100000, guid: 31ffa2d73de1d4e4198fa0b5d1d18f51, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

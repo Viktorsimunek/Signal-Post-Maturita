@@ -68,7 +68,7 @@ Material:
     - _FogSkySoftness: 0.044
     - _FogSkyTopAmount: 0.05
     - _FogSkyTopHeight: 0
-    - _Lightning: 0
+    - _Lightning: 1
     - _LightningDayBoost: 1.89
     - _LightningDouble: 0.75
     - _LightningDuration: 0.961
@@ -113,7 +113,7 @@ Material:
     - _SunMaxAltDeg: 85
     - _SunSizeDeg: 2
     - _SunSizeMul: 7.7
-    - _Time01: 0.541
+    - _Time01: 0.528
     - _Twilight: 0.18
     - _UsePSXQuantize: 0
     m_Colors:
