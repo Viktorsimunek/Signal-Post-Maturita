@@ -46,13 +46,15 @@ Material:
     - _DistanceFadeStart: 550
     - _DitherMode: 1
     - _EdgeFade: 0.43
+    - _GodrayStrength: 0.359
     - _HeightBottom: 0.45
     - _HeightShading: 0.35
     - _HeightTop: 0.77
     - _NoiseScale: 1.38
+    - _ShadowStepInterval: 2
     - _SilverLining: 0.45
     - _Softness: 0.5
-    - _Steps: 48
+    - _Steps: 34.5
     - _UseCloudWeather: 1
     - _WindSpeed: 0.02
     - _WorldSpace: 1

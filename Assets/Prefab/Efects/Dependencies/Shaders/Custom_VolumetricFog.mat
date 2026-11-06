@@ -32,7 +32,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _Absorption: 0.65
-    - _AtmosphereBlend: 0.65
+    - _AtmosphereBlend: 0.679
     - _BodyContrast: 0
     - _BottomCutEnabled: 1
     - _BottomCutFade: 0.0717
@@ -46,10 +46,12 @@ Material:
     - _DistanceFadeStart: 600
     - _DitherMode: 1
     - _EdgeFade: 0.43
+    - _GodrayStrength: 0.501
     - _HeightBottom: 1.528
     - _HeightShading: 0
     - _HeightTop: 0.77
     - _NoiseScale: 0.78
+    - _ShadowStepInterval: 2
     - _SilverLining: 0
     - _Softness: 0.395
     - _Steps: 24.1

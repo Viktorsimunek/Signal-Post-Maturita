@@ -35,6 +35,8 @@ Shader "Custom/VolumetricClouds"
         _AtmosphereBlend ("Distant Haze", Range(0, 1)) = 0.65
 
         [Header(Cloud Lighting)]
+        _GodrayStrength ("Scene Shadow / Godray Strength", Range(0, 1)) = 1
+        [Enum(Every Step,1,Every 2 Steps,2,Every 4 Steps,4)] _ShadowStepInterval ("Shadow Sample Interval", Float) = 2
         _HeightShading ("Darker Underside", Range(0, 1)) = 0
         _SilverLining ("Sunlit Edges", Range(0, 1)) = 0
         _BodyContrast ("Body Contrast", Range(0, 1)) = 0
@@ -66,6 +68,12 @@ Shader "Custom/VolumetricClouds"
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 3.5
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+
+            // Volume samples need the world-space atlas, never the opaque
+            // surface's screen-space shadow. Keep hard comparison sampling:
+            // no _SHADOWS_SOFT variants or secondary light march.
+            #define _SURFACE_TYPE_TRANSPARENT 1
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -104,6 +112,8 @@ Shader "Custom/VolumetricClouds"
                 float _DistanceFadeEnd;
                 float _UseCloudWeather;
                 float _AtmosphereBlend;
+                float _GodrayStrength;
+                float _ShadowStepInterval;
                 float _HeightShading;
                 float _SilverLining;
                 float _BodyContrast;
@@ -284,10 +294,12 @@ Shader "Custom/VolumetricClouds"
 
 
                 float noise =
-                    SAMPLE_TEXTURE3D(
+                    // Divergent raymarch loops cannot use implicit derivatives.
+                    SAMPLE_TEXTURE3D_LOD(
                         _NoiseTex,
                         sampler_NoiseTex,
-                        noiseUV
+                        noiseUV,
+                        0
                     ).r;
 
 
@@ -295,7 +307,7 @@ Shader "Custom/VolumetricClouds"
                 float density =
                     smoothstep(
                         _Coverage + _CloudWeather.z * _UseCloudWeather,
-                        _Coverage + _CloudWeather.z * _UseCloudWeather + _Softness,
+                        _Coverage + _CloudWeather.z * _UseCloudWeather + max(_Softness, 0.001),
                         noise
                     );
 
@@ -448,6 +460,10 @@ Shader "Custom/VolumetricClouds"
 
                 float3 accumulatedColor =
                     float3(0, 0, 0);
+                float3 accumulatedSunColor = float3(0, 0, 0);
+                int shadowInterval = clamp((int)_ShadowStepInterval, 1, 4);
+                int nextShadowStep = 0;
+                half sceneShadow = 1.0h;
 
 
                 [loop]
@@ -489,6 +505,22 @@ Shader "Custom/VolumetricClouds"
                                 density * 0.35
                             );
 
+                        #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                        if (_GodrayStrength > 0.0 && i >= nextShadowStep)
+                        {
+                            float3 samplePositionWS = cameraWS + rayDirectionWS * currentDistance;
+                            half shadowFade = GetMainLightShadowFade(samplePositionWS);
+                            sceneShadow = 1.0h;
+                            if (shadowFade < 1.0h)
+                            {
+                                half shadow = MainLightRealtimeShadow(
+                                    TransformWorldToShadowCoord(samplePositionWS));
+                                sceneShadow = lerp(shadow, 1.0h, shadowFade);
+                            }
+                            nextShadowStep = i + shadowInterval;
+                        }
+                        #endif
+
 
                         float3 sampleColor =
                             lerp(
@@ -517,6 +549,8 @@ Shader "Custom/VolumetricClouds"
                         accumulatedColor +=
                             sampleColor *
                             contribution;
+                        accumulatedSunColor += sampleColor * contribution
+                            * lerp(1.0h, sceneShadow, _GodrayStrength);
 
 
                         accumulatedAlpha +=
@@ -538,15 +572,15 @@ Shader "Custom/VolumetricClouds"
 
                 // Evaluate scene lighting once per visible pixel, not per march step.
                 // The time-of-day controller already drives the sun and ambient light.
-                // No extra noise samples, shadow lookups or secondary light marches.
+                // Reuse the shadow-weighted integral for direct sunlight only.
                 Light mainLight = GetMainLight();
                 float3 ambientLight = SampleSH(float3(0.0, 1.0, 0.0));
                 // Mild forward scattering brightens clouds when looking toward the sun.
                 float towardsLight = saturate(dot(rayDirectionWS, mainLight.direction));
                 float scattering = 0.75 + 0.5 * towardsLight * towardsLight;
-                float3 illumination = max(ambientLight, 0.0)
-                    + mainLight.color * mainLight.distanceAttenuation * scattering;
-                accumulatedColor *= illumination * _Brightness;
+                float3 sunlight = mainLight.color * mainLight.distanceAttenuation * scattering;
+                accumulatedColor = (accumulatedColor * max(ambientLight, 0.0)
+                    + accumulatedSunColor * sunlight) * _Brightness;
 
                 // Reuse the march result. All shaping happens once per pixel.
                 float averageDistance = accumulatedDistance / max(accumulatedAlpha, 0.001);
