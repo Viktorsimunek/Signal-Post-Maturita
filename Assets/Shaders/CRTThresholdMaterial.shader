@@ -63,6 +63,7 @@ Shader "SignalPost/CRTThresholdMaterial"
             #pragma target 3.0
             #pragma vertex Vert
             #pragma fragment Frag
+            #pragma multi_compile _ SIGNALPOST_CRT_VERY_LOW SIGNALPOST_CRT_LOW
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -141,6 +142,9 @@ Shader "SignalPost/CRTThresholdMaterial"
                 centered *= 1.0 + (_Curvature * r2);
                 uv = centered * 0.5 + 0.5;
 
+                #if defined(SIGNALPOST_CRT_LOW)
+                    return uv;
+                #endif
                 half time = _UnscaledTime;
 
                 UNITY_BRANCH
@@ -234,6 +238,18 @@ Shader "SignalPost/CRTThresholdMaterial"
 
             half4 Frag(Varyings input) : SV_Target
             {
+                #if defined(SIGNALPOST_CRT_VERY_LOW)
+                    float2 uv = input.uv;
+                    half4 baseSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv) * _BaseColor;
+                    half luma = dot(baseSample.rgb, half3(0.299h, 0.587h, 0.114h));
+                    half gate = smoothstep(_Threshold - _Softness, _Threshold + _Softness, luma);
+                    half scan = 1.0h - _ScanlineStrength * 0.45h * step(0.5h, frac(uv.y * _ScanlineDensity * 0.15915494h));
+                    half2 edge = uv * (1.0h - uv);
+                    half vignette = lerp(1.0h, saturate(edge.x * edge.y * 32.0h), _Vignette * 0.35h);
+                    half3 screen = baseSample.rgb * lerp(_Darken, 1.0h, gate) * scan * vignette;
+                    half3 emissive = screen * _ColorTint.rgb * max(baseSample.rgb, 0.25h) * _EmissionColor.rgb * _EmissionStrength;
+                    return half4(max(emissive + _GlassTint.rgb * _BaseColor.rgb * 0.12h, 0.0h), baseSample.a);
+                #else
                 float2 textureSize = max(_BaseMap_TexelSize.zw, float2(1.0, 1.0));
                 float2 uv = ApplyCrtUv(input.uv, textureSize);
 
@@ -244,7 +260,14 @@ Shader "SignalPost/CRTThresholdMaterial"
 
                 half4 baseSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv) * _BaseColor;
 
-                half3 crtColor = ApplyCrtColor(uv, textureSize, baseSample.rgb);
+                #if defined(SIGNALPOST_CRT_LOW)
+                    half luma = dot(baseSample.rgb, half3(0.299h, 0.587h, 0.114h));
+                    half gate = smoothstep(_Threshold - _Softness, _Threshold + _Softness, luma);
+                    half scan = 1.0h - _ScanlineStrength * 0.45h * step(0.5h, frac(uv.y * _ScanlineDensity * 0.15915494h));
+                    half3 crtColor = baseSample.rgb * lerp(_Darken, 1.0h, gate) * scan;
+                #else
+                    half3 crtColor = ApplyCrtColor(uv, textureSize, baseSample.rgb);
+                #endif
 
                 half3 emissive = crtColor * _ColorTint.rgb;
                 emissive *= max(baseSample.rgb, half3(0.25h, 0.25h, 0.25h));
@@ -253,10 +276,15 @@ Shader "SignalPost/CRTThresholdMaterial"
                 half3 normalWS = normalize(input.normalWS);
                 half3 viewDirWS = SafeNormalize(input.viewDirWS);
                 half3 surfaceColor = lerp(_GlassTint.rgb, crtColor * 0.4h + _GlassTint.rgb, 0.35h) * _BaseColor.rgb;
-                half3 lighting = EvaluateLighting(normalWS, viewDirWS, surfaceColor);
+                #if defined(SIGNALPOST_CRT_LOW)
+                    half3 lighting = surfaceColor * 0.2h;
+                #else
+                    half3 lighting = EvaluateLighting(normalWS, viewDirWS, surfaceColor);
+                #endif
 
                 half3 finalColor = lighting + emissive;
                 return half4(max(finalColor, 0.0h), baseSample.a);
+                #endif
             }
             ENDHLSL
         }

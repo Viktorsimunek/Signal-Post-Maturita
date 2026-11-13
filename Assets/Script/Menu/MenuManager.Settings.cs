@@ -15,6 +15,7 @@ public partial class MenuManager
             "SFX VOLUME: " + FormatSlider(GameSettings.SfxVolume),
             "DISPLAY MODE: " + GameSettings.GetDisplayModeLabel(),
             "RESOLUTION: " + FormatResolution(),
+            "GRAPHICS QUALITY: " + GameSettings.GetGraphicsQualityLabel(),
             "RENDER SCALE: " + FormatPercent(GameSettings.RenderScale),
             "BRIGHTNESS: " + FormatPercent(GameSettings.Brightness),
             "INPUT MODE: " + GameSettings.GetInputModeLabel(),
@@ -27,7 +28,8 @@ public partial class MenuManager
             "BACK"
         };
 
-        return BuildMenuText("SETTINGS", labels, selectedIndex);
+        // Keep the complete settings list, including BACK, inside the CRT screen.
+        return "<size=80%>" + BuildMenuText("SETTINGS", labels, selectedIndex) + "</size>";
     }
 
     private string BuildInputBindingsMenuText()
@@ -242,79 +244,83 @@ public partial class MenuManager
             return;
         }
 
-        switch (selectedIndex)
+        switch (settingsItems[selectedIndex])
         {
-            case 0:
+            case "MASTER VOLUME":
                 GameSettings.SetMasterVolume(GameSettings.MasterVolume + direction * volumeStep);
                 CommitSettings("MASTER " + FormatPercent(GameSettings.MasterVolume));
                 break;
-            case 1:
+            case "MUSIC VOLUME":
                 GameSettings.SetMusicVolume(GameSettings.MusicVolume + direction * volumeStep);
                 CommitSettings("MUSIC " + FormatPercent(GameSettings.MusicVolume));
                 break;
-            case 2:
+            case "SFX VOLUME":
                 GameSettings.SetSfxVolume(GameSettings.SfxVolume + direction * volumeStep);
                 CommitSettings("SFX " + FormatPercent(GameSettings.SfxVolume));
                 break;
-            case 3:
+            case "DISPLAY MODE":
                 if (direction != 0)
                 {
                     GameSettings.CycleDisplayMode(direction);
                     CommitSettings("DISPLAY " + GameSettings.GetDisplayModeLabel());
                 }
                 break;
-            case 4:
+            case "RESOLUTION":
                 CycleResolution(direction);
                 CommitSettings("RESOLUTION " + FormatResolution());
                 break;
-            case 5:
+            case "GRAPHICS QUALITY":
+                GameSettings.CycleGraphicsQuality(direction);
+                CommitSettings("GRAPHICS " + GameSettings.GetGraphicsQualityLabel());
+                break;
+            case "RENDER SCALE":
                 GameSettings.SetRenderScale(GameSettings.RenderScale + direction * renderScaleStep);
                 CommitSettings("RENDER SCALE " + FormatPercent(GameSettings.RenderScale));
                 break;
-            case 6:
+            case "BRIGHTNESS":
                 GameSettings.SetBrightness(GameSettings.Brightness + direction * brightnessStep);
                 CommitSettings("BRIGHTNESS " + FormatPercent(GameSettings.Brightness));
                 break;
-            case 7:
+            case "INPUT MODE":
                 if (direction != 0)
                 {
                     GameSettings.CycleInputMode(direction);
                     CommitSettings("INPUT " + GameSettings.GetInputModeLabel());
                 }
                 break;
-            case 8:
+            case "INPUT BINDINGS":
                 RequestOpenInputBindingsMenu();
                 break;
-            case 9:
+            case "INVERT Y":
                 if (direction != 0)
                 {
                     GameSettings.SetInvertY(!GameSettings.InvertY);
                     CommitSettings(GameSettings.InvertY ? "INVERT Y ON" : "INVERT Y OFF");
                 }
                 break;
-            case 10:
+            case "V SYNC":
                 if (direction != 0)
                 {
                     GameSettings.SetVSync(!GameSettings.VSyncEnabled);
                     CommitSettings(GameSettings.VSyncEnabled ? "V SYNC ON" : "V SYNC OFF");
                 }
                 break;
-            case 11:
+            case "FPS LIMIT":
                 CycleFpsLimit(direction);
                 CommitSettings("FPS LIMIT " + FormatFpsLimit());
                 break;
-            case 12:
+            case "FPS DISPLAY":
                 if (direction != 0)
                 {
                     GameSettings.SetShowFpsDisplay(!GameSettings.ShowFpsDisplay);
                     CommitSettings(GameSettings.ShowFpsDisplay ? "FPS DISPLAY ON" : "FPS DISPLAY OFF");
                 }
                 break;
-            case 13:
+            case "RESET DEFAULTS":
                 GameSettings.ResetToDefaults();
                 CommitSettings("SETTINGS RESET");
                 break;
-            case 14:
+            case "BACK":
                 RequestOpenMainMenu();
                 break;
         }

@@ -77,6 +77,7 @@ public partial class MenuManager : MonoBehaviour
         "SFX VOLUME",
         "DISPLAY MODE",
         "RESOLUTION",
+        "GRAPHICS QUALITY",
         "RENDER SCALE",
         "BRIGHTNESS",
         "INPUT MODE",

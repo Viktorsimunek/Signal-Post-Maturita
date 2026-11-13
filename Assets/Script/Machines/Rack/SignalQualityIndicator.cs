@@ -15,6 +15,10 @@ public class SignalQualityIndicator : MonoBehaviour
 
     private Material[] materials;
     private float manualQuality = 1f;
+    private float lastQuality = -1f;
+    private bool lastPower;
+    private Color lastBadColor, lastGoodColor;
+    private float lastEmissionPower = -1f;
 
     private void Reset()
     {
@@ -86,6 +90,15 @@ public class SignalQualityIndicator : MonoBehaviour
         float quality = hasPower ? (signalQuality != null ? signalQuality.Quality : manualQuality) : 0f;
         quality = Mathf.Clamp01(quality);
 
+        if (Mathf.Approximately(lastQuality, quality) && lastPower == hasPower &&
+            lastBadColor == badColor && lastGoodColor == goodColor &&
+            Mathf.Approximately(lastEmissionPower, emissionPower)) return;
+        lastQuality = quality;
+        lastPower = hasPower;
+        lastBadColor = badColor;
+        lastGoodColor = goodColor;
+        lastEmissionPower = emissionPower;
+
         for (int i = 0; i < materials.Length; i++)
         {
             if (materials[i] == null)
@@ -97,6 +110,13 @@ public class SignalQualityIndicator : MonoBehaviour
             Color color = hasPower ? Color.Lerp(badColor, goodColor, lightValue) : Color.black;
             SetMaterialColor(materials[i], color);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (materials == null) return;
+        foreach (Material material in materials)
+            if (material != null) Destroy(material);
     }
 
     private void SetMaterialColor(Material material, Color color)

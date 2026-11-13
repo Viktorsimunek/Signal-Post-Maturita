@@ -83,8 +83,19 @@ public class Lights : MonoBehaviour
     private float lastApplied = -999f;
     private float distanceCheckTimer;
     private float seed;
+    private LightShadows[] authoredShadows;
+    private bool shadowsAllowed = true;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCameraCache() { mainCam = null; }
 
     public bool IsPowered => isPowered;
+
+    // Also used when switching presets while the game is paused.
+    public void RefreshOptimization()
+    {
+        if (RefreshDistanceState()) Apply(currentIntensity, true);
+    }
 
     private void Awake()
     {
@@ -114,7 +125,7 @@ public class Lights : MonoBehaviour
 
     private void Update()
     {
-        if (!isPowered || !turnOffRealLightsFarAway || controlledLights.Length == 0) return;
+        if (!isPowered || controlledLights.Length == 0) return;
 
         distanceCheckTimer -= Time.deltaTime;
         if (distanceCheckTimer > 0f) return;
@@ -309,21 +320,58 @@ public class Lights : MonoBehaviour
             if (controlledLights[i] != null && disableRealtimeShadows)
                 controlledLights[i].shadows = LightShadows.None;
 
+        authoredShadows = new LightShadows[controlledLights.Length];
+        for (int i = 0; i < controlledLights.Length; i++)
+            if (controlledLights[i] != null) authoredShadows[i] = controlledLights[i].shadows;
+        distanceCheckTimer = Random.Range(0f, 0.35f);
         RefreshDistanceState();
     }
 
     private bool RefreshDistanceState()
     {
         bool old = realLightsAllowed;
-        realLightsAllowed = true;
-
-        if (turnOffRealLightsFarAway && realLightDistance > 0f)
+        if (mainCam == null)
         {
-            if (mainCam == null && Camera.main != null) mainCam = Camera.main.transform;
-            if (mainCam != null)
-                realLightsAllowed = (mainCam.position - transform.position).sqrMagnitude <= realLightDistance * realLightDistance;
+            Camera taggedCamera = Camera.main;
+            if (taggedCamera != null) mainCam = taggedCamera.transform;
+            else
+            {
+                FirstPersonController player = FindFirstObjectByType<FirstPersonController>();
+                if (player != null) mainCam = player.CameraRoot;
+            }
         }
 
+        if (mainCam == null) return false; // Fail open if the player has not spawned yet.
+        var preset = GraphicsQualityPresets.Current;
+        float distanceSq = (mainCam.position - transform.position).sqrMagnitude;
+        float reach = 0f;
+        for (int i = 0; i < controlledLights.Length; i++)
+            if (controlledLights[i] != null)
+                reach = Mathf.Max(reach, controlledLights[i].range +
+                    Vector3.Distance(transform.position, controlledLights[i].transform.position));
+        // Never cull inside the light's sphere of influence; use hysteresis at the boundary.
+        float lightLimit = Mathf.Max(reach + 5f, Mathf.Min(realLightDistance, preset.LightDistance));
+        if (GameSettings.CurrentGraphicsQuality == GameSettings.GraphicsQuality.Ultra)
+            lightLimit = Mathf.Max(lightLimit, preset.LightDistance);
+        if (turnOffRealLightsFarAway && realLightDistance > 0f)
+        {
+            float threshold = lightLimit + (realLightsAllowed ? 4f : 0f);
+            realLightsAllowed = distanceSq <= threshold * threshold;
+        }
+        else realLightsAllowed = true;
+
+        float shadowLimit = preset.LocalShadowDistance + (shadowsAllowed ? 3f : 0f);
+        shadowsAllowed = preset.LocalShadowDistance > 0f && distanceSq <= shadowLimit * shadowLimit;
+        if (authoredShadows != null)
+            for (int i = 0; i < controlledLights.Length; i++)
+            {
+                Light light = controlledLights[i];
+                if (light == null) continue;
+                bool keep = !disableRealtimeShadows && shadowsAllowed &&
+                    (light.type != LightType.Point || preset.PointLightShadows);
+                LightShadows target = keep ? authoredShadows[i] : LightShadows.None;
+                if (light.shadows != target) light.shadows = target;
+            }
         return old != realLightsAllowed;
     }
 

@@ -41,7 +41,7 @@ Material:
     - _CloudScale: 171.4
     - _Coverage: 0.045
     - _Cull: 1
-    - _Density: 0.06
+    - _Density: 0.1
     - _DistanceFadeEnd: 0
     - _DistanceFadeStart: 600
     - _DitherMode: 1

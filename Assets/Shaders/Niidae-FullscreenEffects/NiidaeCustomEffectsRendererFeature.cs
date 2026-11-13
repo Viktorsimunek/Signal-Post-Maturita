@@ -67,6 +67,9 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
     [Tooltip("Enable custom effects in Scene View cameras.")]
     private bool m_EnableInSceneView = true;
 
+    [SerializeField, Tooltip("Use the separate Retro Lite feature for pixelization, posterization and scanlines. Opt-in on low renderer assets only.")]
+    private bool m_UseRetroLite;
+
     public bool EnableInSceneView
     {
         get => m_EnableInSceneView;
@@ -206,6 +209,9 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
+        // UI/monitor cameras explicitly disable postprocessing. Do not enqueue the global stack for them.
+        if (renderingData.cameraData.cameraType == CameraType.Game && !renderingData.cameraData.postProcessEnabled)
+            return;
         CameraType cameraType = renderingData.cameraData.cameraType;
         if (cameraType == CameraType.Preview || cameraType == CameraType.Reflection)
             return;
@@ -215,7 +221,7 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
 
         Shader.SetGlobalFloat(kGlobalFpsPropertyId, Mathf.Max(1f, m_Framerate));
         ApplyFramerateToPasses();
-        CacheActiveEffects(VolumeManager.instance.stack);
+        CacheActiveEffects(VolumeManager.instance.stack, cameraType == CameraType.Game);
 
         m_QueuedEffects.Clear();
 
@@ -377,13 +383,16 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
             runtimeEntry.Value.pass?.SetFrameRate(m_Framerate);
     }
 
-    private void CacheActiveEffects(VolumeStack stack)
+    private void CacheActiveEffects(VolumeStack stack, bool gameCamera)
     {
         m_ActiveEffects.Clear();
         for (int i = 0; i < kAllEffects.Length; i++)
         {
             EffectType effect = kAllEffects[i];
-            m_ActiveEffects[effect] = IsEffectActive(effect, stack);
+            bool combined = gameCamera && m_UseRetroLite && Application.isPlaying &&
+                GameSettings.CurrentGraphicsQuality <= GameSettings.GraphicsQuality.Low &&
+                (effect == EffectType.Pixelization || effect == EffectType.Posterize || effect == EffectType.Scanlines);
+            m_ActiveEffects[effect] = !combined && IsEffectActive(effect, stack);
         }
     }
 
@@ -411,6 +420,15 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
 
     private static bool IsEffectActive(EffectType effect, VolumeStack stack)
     {
+        if (Application.isPlaying)
+        {
+            var quality = GameSettings.CurrentGraphicsQuality;
+            if (quality == GameSettings.GraphicsQuality.VeryLow &&
+                effect != EffectType.Posterize && effect != EffectType.Pixelization && effect != EffectType.Scanlines)
+                return false;
+            if (quality <= GameSettings.GraphicsQuality.Medium && effect == EffectType.VHSGhosting)
+                return false;
+        }
         switch (effect)
         {
             case EffectType.Posterize:
@@ -860,7 +878,23 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
 
         private static int ComputeIterations(int radius)
         {
-            return Mathf.Clamp(radius, 1, 8);
+            int cap = Application.isPlaying ? Mathf.Max(1, GraphicsQualityPresets.Current.BloomIterations) : 8;
+            return Mathf.Clamp(radius, 1, cap);
+        }
+
+        // Labels are immutable; avoid allocating four interpolated strings per blur iteration per frame.
+        private static readonly string[][] BloomBlurLabels = BuildBloomBlurLabels();
+        private static string[][] BuildBloomBlurLabels()
+        {
+            string[] prefixes = { "Niidae Combined Bloom Near Blur A ", "Niidae Combined Bloom Near Blur B ",
+                "Niidae Combined Bloom Far Blur A ", "Niidae Combined Bloom Far Blur B " };
+            var labels = new string[4][];
+            for (int branch = 0; branch < 4; branch++)
+            {
+                labels[branch] = new string[8];
+                for (int i = 0; i < 8; i++) labels[branch][i] = prefixes[branch] + i;
+            }
+            return labels;
         }
 
         private TextureHandle ExecuteBloom(RenderGraph renderGraph, TextureHandle color, BloomVolumeComponent bloom)
@@ -904,16 +938,17 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
             TextureHandle currentNear = nearA;
             TextureHandle currentFar = farA;
             float radiusT = Mathf.Clamp01((bloom.radius.value - 1f) / 15f);
-            float nearScale = Mathf.Lerp(0.8f, 2.2f, radiusT) * Mathf.Max(0.25f, bloom.blurRadiusNear.value);
-            float farScale = Mathf.Lerp(0.8f, 2.2f, radiusT) * Mathf.Max(0.25f, bloom.blurRadiusFar.value);
+            float spreadCompensation = Mathf.Sqrt(Mathf.Clamp(bloom.radius.value, 1, 8) / (float)iterations);
+            float nearScale = Mathf.Lerp(0.8f, 2.2f, radiusT) * Mathf.Max(0.25f, bloom.blurRadiusNear.value) * spreadCompensation;
+            float farScale = Mathf.Lerp(0.8f, 2.2f, radiusT) * Mathf.Max(0.25f, bloom.blurRadiusFar.value) * spreadCompensation;
 
             for (int i = 0; i < iterations; i++)
             {
-                currentNear = RunFullscreenTo(renderGraph, currentNear, nearBlurA, m_Material, 1, PassMode.BloomBlur, $"Niidae Combined Bloom Near Blur A {i}", new Vector4(0f, 0f, nearScale, 0.3926991f * (i + 1)), Vector4.zero, Vector4.zero);
-                currentNear = RunFullscreenTo(renderGraph, currentNear, nearBlurB, m_Material, 2, PassMode.BloomBlur, $"Niidae Combined Bloom Near Blur B {i}", new Vector4(0f, 0f, nearScale, 1.1780972f * (i + 1)), Vector4.zero, Vector4.zero);
+                currentNear = RunFullscreenTo(renderGraph, currentNear, nearBlurA, m_Material, 1, PassMode.BloomBlur, BloomBlurLabels[0][i], new Vector4(0f, 0f, nearScale, 0.3926991f * (i + 1)), Vector4.zero, Vector4.zero);
+                currentNear = RunFullscreenTo(renderGraph, currentNear, nearBlurB, m_Material, 2, PassMode.BloomBlur, BloomBlurLabels[1][i], new Vector4(0f, 0f, nearScale, 1.1780972f * (i + 1)), Vector4.zero, Vector4.zero);
 
-                currentFar = RunFullscreenTo(renderGraph, currentFar, farBlurA, m_Material, 1, PassMode.BloomBlur, $"Niidae Combined Bloom Far Blur A {i}", new Vector4(0f, 0f, farScale, 0.7853982f * (i + 1)), Vector4.zero, Vector4.zero);
-                currentFar = RunFullscreenTo(renderGraph, currentFar, farBlurB, m_Material, 2, PassMode.BloomBlur, $"Niidae Combined Bloom Far Blur B {i}", new Vector4(0f, 0f, farScale, 1.9634954f * (i + 1)), Vector4.zero, Vector4.zero);
+                currentFar = RunFullscreenTo(renderGraph, currentFar, farBlurA, m_Material, 1, PassMode.BloomBlur, BloomBlurLabels[2][i], new Vector4(0f, 0f, farScale, 0.7853982f * (i + 1)), Vector4.zero, Vector4.zero);
+                currentFar = RunFullscreenTo(renderGraph, currentFar, farBlurB, m_Material, 2, PassMode.BloomBlur, BloomBlurLabels[3][i], new Vector4(0f, 0f, farScale, 1.9634954f * (i + 1)), Vector4.zero, Vector4.zero);
             }
 
             Vector4 compositeParams = new Vector4(bloom.intensity.value, bloom.steps.value, bloom.saturation.value, bloom.gammaBefore.value);

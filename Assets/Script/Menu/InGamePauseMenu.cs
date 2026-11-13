@@ -64,6 +64,7 @@ public class InGamePauseMenu : MonoBehaviour
         "MASTER VOLUME",
         "V SYNC",
         "FPS LIMIT",
+        "GRAPHICS QUALITY",
         "RENDER SCALE",
         "FPS DISPLAY",
         "MAIN MENU",
@@ -72,6 +73,8 @@ public class InGamePauseMenu : MonoBehaviour
 
     private readonly int[] fpsLimitOptions = { 0, 30, 60, 90, 120, 144, 165, 240 };
 
+    private AudioSource menuAudioSource;
+    private PauseAudioEffect pauseAudio;
     private FirstPersonController controller;
     private GameObject fallbackCanvasObject;
     private int selectedIndex;
@@ -115,7 +118,15 @@ public class InGamePauseMenu : MonoBehaviour
         GameSettings.EnsureLoaded();
         EnsureUi();
         SetupPauseBlur();
+        pauseAudio = GetComponent<PauseAudioEffect>();
+        if (pauseAudio == null) pauseAudio = gameObject.AddComponent<PauseAudioEffect>();
         SetOpen(false);
+    }
+
+    private void OnDisable()
+    {
+        if (pauseAudio != null) pauseAudio.RestoreImmediate();
+        if (menuAudioSource != null) menuAudioSource.Stop();
     }
 
     private void OnDestroy()
@@ -195,6 +206,7 @@ public class InGamePauseMenu : MonoBehaviour
     private void SetOpen(bool open)
     {
         isOpen = open;
+        if (pauseAudio != null) pauseAudio.SetPaused(open);
         if (pauseCanvasGroup != null)
         {
             fadeTargetAlpha = open ? 1f : 0f;
@@ -483,6 +495,14 @@ public class InGamePauseMenu : MonoBehaviour
             return;
         }
 
+        if (selectedItem == "GRAPHICS QUALITY")
+        {
+            GameSettings.CycleGraphicsQuality(direction);
+            if (playCursorSfx) PlaySfx(cursorBeep);
+            CommitSettings();
+            return;
+        }
+
         if (selectedItem == "RENDER SCALE")
         {
             GameSettings.SetRenderScale(GameSettings.RenderScale + direction * renderScaleStep);
@@ -501,17 +521,12 @@ public class InGamePauseMenu : MonoBehaviour
 
     private void PlaySfx(AudioClip clip)
     {
-        if (sfxSource == null || clip == null)
-        {
-            return;
-        }
+        if (!isOpen || sfxSource == null || clip == null) return;
 
-        sfxSource.pitch = clip == cursorBeep
-            ? Random.Range(Mathf.Min(cursorPitchMin, cursorPitchMax), Mathf.Max(cursorPitchMin, cursorPitchMax))
-            : 1f;
-        sfxSource.PlayOneShot(clip);
+        float pitch = clip == cursorBeep
+            ? Random.Range(Mathf.Min(cursorPitchMin, cursorPitchMax), Mathf.Max(cursorPitchMin, cursorPitchMax)) : 1f;
+        MenuFeedbackAudio.Play(ref menuAudioSource, transform, sfxSource, clip, pitch);
     }
-
     private void CommitSettings()
     {
         GameSettings.Save();
@@ -650,6 +665,8 @@ public class InGamePauseMenu : MonoBehaviour
                 return "V SYNC: " + (GameSettings.VSyncEnabled ? "ON" : "OFF");
             case "FPS LIMIT":
                 return "FPS LIMIT: " + FormatFpsLimit();
+            case "GRAPHICS QUALITY":
+                return "QUALITY: " + GameSettings.GetGraphicsQualityLabel();
             case "RENDER SCALE":
                 return "RENDER SCALE: " + FormatPercent(GameSettings.RenderScale);
             case "FPS DISPLAY":

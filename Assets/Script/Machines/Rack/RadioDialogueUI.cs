@@ -434,6 +434,13 @@ public class RadioDialogueUI : MonoBehaviour
         if (canvasGroup == null) return;
 
         StopRoutine(ref fadeRoutine);
+        if (!isActiveAndEnabled)
+        {
+            canvasGroup.alpha = visible ? 1f : 0f;
+            canvasGroup.interactable = visible;
+            canvasGroup.blocksRaycasts = visible;
+            return;
+        }
         fadeRoutine = StartCoroutine(FadeCanvasGroup(visible));
     }
 
@@ -1026,6 +1033,12 @@ public class RadioDialogueUI : MonoBehaviour
     {
         if (source == null) return null;
         if (routine != null) StopCoroutine(routine);
+        if (!isActiveAndEnabled)
+        {
+            source.Stop();
+            source.volume = play ? targetVolume : 0f;
+            return null;
+        }
         return StartCoroutine(FadeAudioRoutine(source, clip, targetVolume, play));
     }
 

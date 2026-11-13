@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 [DisallowMultipleComponent]
@@ -33,8 +34,7 @@ public class CameraToTextureWithShader : MonoBehaviour
         {
             sourceCamera.enabled = true;
             ClearTarget(clearColor);
-            Canvas.ForceUpdateCanvases();
-            sourceCamera.Render();
+            // The regular camera loop refreshes the texture after UI updates.
         }
     }
 
@@ -83,8 +83,8 @@ public class CameraToTextureWithShader : MonoBehaviour
         ConfigureSourceCameraData();
         RedirectCanvasCameras(sourceCamera);
         sourceCamera.enabled = true;
-        Canvas.ForceUpdateCanvases();
-        sourceCamera.Render();
+        // Scheduling a normal render avoids re-entering URP from a render callback or OnEnable.
+        // The UI camera is enabled above and will render later in this frame / the next camera loop.
     }
 
     private void EnsureMonitorCanvases()
@@ -156,9 +156,12 @@ public class CameraToTextureWithShader : MonoBehaviour
         sourceCamera.backgroundColor = clearColor;
         sourceCamera.cullingMask = 1 << UiLayer;
         sourceCamera.allowMSAA = false;
+        sourceCamera.useOcclusionCulling = false;
         sourceCamera.depthTextureMode = DepthTextureMode.None;
 
         UniversalAdditionalCameraData cameraData = sourceCamera.GetUniversalAdditionalCameraData();
+        // Preserve the authored CRT renderer. It supplies the terminal's tint and screen effects;
+        // quality keywords simplify its shader only on Low / Very Low.
         cameraData.volumeLayerMask = 0;
         cameraData.volumeTrigger = null;
         cameraData.requiresDepthOption = CameraOverrideOption.Off;

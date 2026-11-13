@@ -17,6 +17,7 @@ public static class GameSettings
     private const string ResolutionWidthKey = "settings_resolution_width";
     private const string ResolutionHeightKey = "settings_resolution_height";
     private const string RenderScaleKey = "settings_render_scale";
+    private const string GraphicsQualityKey = "settings_graphics_quality";
     private const string BrightnessKey = "settings_brightness";
     private const string MouseSensitivityKey = "settings_mouse_sensitivity";
     private const string GamepadSensitivityKey = "settings_gamepad_sensitivity";
@@ -32,7 +33,6 @@ public static class GameSettings
     private const int DefaultFpsLimit = 60;
     private const int DefaultShowFpsDisplay = 0;
     private const int DefaultDisplayMode = (int)DisplayMode.BorderlessFullscreen;
-    private const float DefaultRenderScale = 1f;
     private const float DefaultBrightness = 0.5f;
     private const float DefaultMouseSensitivity = 0.6f;
     private const float DefaultGamepadSensitivity = 0.6f;
@@ -42,8 +42,12 @@ public static class GameSettings
     private const float MaxMouseSensitivity = 2f;
     private const float MinGamepadSensitivity = 0.15f;
     private const float MaxGamepadSensitivity = 2f;
-    private const float MinRenderScale = 0.5f;
+    private const float MinRenderScale = 0.25f;
     private const float MaxRenderScale = 1f;
+
+    public enum GraphicsQuality { VeryLow, Low, Medium, High, Ultra }
+
+    public static GraphicsQuality CurrentGraphicsQuality { get; private set; } = GraphicsQuality.High;
 
     public enum DisplayMode
     {
@@ -114,7 +118,11 @@ public static class GameSettings
         Resolution currentResolution = Screen.currentResolution;
         ResolutionWidth = Mathf.Max(640, PlayerPrefs.GetInt(ResolutionWidthKey, currentResolution.width));
         ResolutionHeight = Mathf.Max(360, PlayerPrefs.GetInt(ResolutionHeightKey, currentResolution.height));
-        RenderScale = ClampRenderScale(PlayerPrefs.GetFloat(RenderScaleKey, DefaultRenderScale));
+        int quality = PlayerPrefs.GetInt(GraphicsQualityKey, (int)GraphicsQuality.High);
+        CurrentGraphicsQuality = (GraphicsQuality)Mathf.Clamp(quality, 0, 4);
+        int outputHeight = CurrentDisplayMode == DisplayMode.BorderlessFullscreen ? currentResolution.height : ResolutionHeight;
+        RenderScale = ClampRenderScale(PlayerPrefs.GetFloat(RenderScaleKey,
+            GraphicsQualityPresets.SuggestedRenderScale(CurrentGraphicsQuality, outputHeight)));
         Brightness = Mathf.Clamp01(PlayerPrefs.GetFloat(BrightnessKey, DefaultBrightness));
         MouseSensitivity = Mathf.Clamp(PlayerPrefs.GetFloat(MouseSensitivityKey, DefaultMouseSensitivity), MinMouseSensitivity, MaxMouseSensitivity);
         GamepadSensitivity = Mathf.Clamp(PlayerPrefs.GetFloat(GamepadSensitivityKey, DefaultGamepadSensitivity), MinGamepadSensitivity, MaxGamepadSensitivity);
@@ -136,6 +144,7 @@ public static class GameSettings
         PlayerPrefs.SetInt(DisplayModeKey, (int)CurrentDisplayMode);
         PlayerPrefs.SetInt(ResolutionWidthKey, ResolutionWidth);
         PlayerPrefs.SetInt(ResolutionHeightKey, ResolutionHeight);
+        PlayerPrefs.SetInt(GraphicsQualityKey, (int)CurrentGraphicsQuality);
         PlayerPrefs.SetFloat(RenderScaleKey, RenderScale);
         PlayerPrefs.SetFloat(BrightnessKey, Brightness);
         PlayerPrefs.SetFloat(MouseSensitivityKey, MouseSensitivity);
@@ -149,6 +158,7 @@ public static class GameSettings
     public static void ApplyRuntime()
     {
         ApplyDisplayMode();
+        GraphicsQualityController.ApplyCurrent();
         ApplyRenderScale();
         QualitySettings.vSyncCount = VSyncEnabled ? 1 : 0;
 
@@ -208,6 +218,23 @@ public static class GameSettings
     {
         RenderScale = ClampRenderScale(value);
         NotifyChanged();
+    }
+
+    public static string GetGraphicsQualityLabel() => GraphicsQualityPresets.Current.Name.ToUpperInvariant();
+
+    public static void SetGraphicsQuality(GraphicsQuality quality)
+    {
+        CurrentGraphicsQuality = (GraphicsQuality)Mathf.Clamp((int)quality, 0, 4);
+        int outputHeight = CurrentDisplayMode == DisplayMode.BorderlessFullscreen
+            ? Screen.currentResolution.height : ResolutionHeight;
+        RenderScale = GraphicsQualityPresets.SuggestedRenderScale(CurrentGraphicsQuality, outputHeight);
+        NotifyChanged();
+    }
+
+    public static void CycleGraphicsQuality(int direction)
+    {
+        if (direction == 0) return;
+        SetGraphicsQuality((GraphicsQuality)(((int)CurrentGraphicsQuality + (direction > 0 ? 1 : -1) + 5) % 5));
     }
 
     public static void SetBrightness(float value)
@@ -274,7 +301,8 @@ public static class GameSettings
         Resolution currentResolution = Screen.currentResolution;
         ResolutionWidth = currentResolution.width;
         ResolutionHeight = currentResolution.height;
-        RenderScale = DefaultRenderScale;
+        CurrentGraphicsQuality = GraphicsQuality.High;
+        RenderScale = GraphicsQualityPresets.SuggestedRenderScale(CurrentGraphicsQuality, currentResolution.height);
         Brightness = DefaultBrightness;
         MouseSensitivity = DefaultMouseSensitivity;
         GamepadSensitivity = DefaultGamepadSensitivity;
@@ -565,7 +593,7 @@ public static class GameSettings
             : QualitySettings.renderPipeline;
 
         UniversalRenderPipelineAsset urpAsset = pipelineAsset as UniversalRenderPipelineAsset;
-        if (urpAsset != null)
+        if (Application.isPlaying && urpAsset != null && urpAsset.name.EndsWith("(Runtime)"))
         {
             urpAsset.renderScale = RenderScale;
         }

@@ -95,6 +95,8 @@ public partial class MenuManager
         eventRoutine = null;
     }
 
+    private AudioSource menuFeedbackSource;
+
     private void PlaySfx(AudioClip clip)
     {
         if (sfxSource == null || clip == null)
@@ -102,10 +104,10 @@ public partial class MenuManager
             return;
         }
 
-        sfxSource.pitch = clip == cursorBeep
+        float pitch = clip == cursorBeep
             ? UnityEngine.Random.Range(Mathf.Min(cursorPitchMin, cursorPitchMax), Mathf.Max(cursorPitchMin, cursorPitchMax))
             : 1f;
-        sfxSource.PlayOneShot(clip);
+        MenuFeedbackAudio.Play(ref menuFeedbackSource, transform, sfxSource, clip, pitch);
     }
 
     private void PlayErrorSfx()

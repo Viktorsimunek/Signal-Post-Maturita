@@ -44,6 +44,7 @@ Shader "/SignalPost/CRTThreshold"
             #pragma target 3.0
             #pragma vertex Vert
             #pragma fragment Frag
+            #pragma multi_compile _ SIGNALPOST_CRT_VERY_LOW SIGNALPOST_CRT_LOW
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
@@ -107,12 +108,17 @@ Shader "/SignalPost/CRTThreshold"
 
             inline half3 SampleSource(float2 uv)
             {
+                half3 source = 0.0h;
+                UNITY_BRANCH
                 if (_UseMainTex > 0.5h)
                 {
-                    return SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb;
+                    source = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb;
                 }
-
-                return SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
+                else
+                {
+                    source = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
+                }
+                return source;
             }
 
             half Luma(half3 color)
@@ -146,6 +152,9 @@ Shader "/SignalPost/CRTThreshold"
                 centered *= 1.0 + (_Curvature * r2);
                 uv = centered * 0.5 + 0.5;
 
+                #if defined(SIGNALPOST_CRT_LOW)
+                    return uv; // Static curvature, no animated UV distortion on Low.
+                #endif
                 float time = _UnscaledTime;
                 float lineNoise = Hash21(half2(floor(uv.y * textureSize.y * 0.35), floor(time * 18.0)));
                 float lineWave = sin((uv.y * _LineJitterDensity) + time * _SyncDriftSpeed);
@@ -161,6 +170,20 @@ Shader "/SignalPost/CRTThreshold"
 
             half4 Frag(Varyings input) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                #if defined(SIGNALPOST_CRT_VERY_LOW)
+                    // One texture lookup, threshold, inexpensive static scanlines and tint.
+                    // No ghost samples, Bayer lookup, trigonometry, noise or pow.
+                    float2 cheapUv = input.texcoord;
+                    half3 cheapColor = SampleSource(cheapUv);
+                    half cheapLuma = dot(cheapColor, half3(0.299h, 0.587h, 0.114h));
+                    half cheapGate = smoothstep(_Threshold - _Softness, _Threshold + _Softness, cheapLuma);
+                    cheapColor *= lerp(_Darken, 1.0h, cheapGate);
+                    half cheapScan = 1.0h - _ScanlineStrength * 0.45h * step(0.5h, frac(cheapUv.y * _ScanlineDensity * 0.15915494h));
+                    half2 edge = cheapUv * (1.0h - cheapUv);
+                    half vignette = lerp(1.0h, saturate(edge.x * edge.y * 32.0h), _Vignette * 0.35h);
+                    return half4(saturate(cheapColor * _ColorTint.rgb * cheapScan * vignette), 1.0h);
+                #else
                 float2 textureSize = _ScreenParams.xy;
                 float2 uv = ApplyCrtUv(input.texcoord, textureSize);
 
@@ -170,18 +193,30 @@ Shader "/SignalPost/CRTThreshold"
                 }
 
                 half3 color = SampleSource(uv);
-                half3 ghostTrail = SampleGhostTrail(uv, 1.0 / textureSize);
+                #if defined(SIGNALPOST_CRT_LOW)
+                    half3 ghostTrail = 0.0h;
+                #else
+                    half3 ghostTrail = SampleGhostTrail(uv, 1.0 / textureSize);
+                #endif
 
                 half luma = dot(color, half3(0.299h, 0.587h, 0.114h));
                 float2 ditherCoord = (uv * textureSize) / max(_BayerScale, 0.001h);
-                half bayer = Bayer4x4(ditherCoord) - 0.5h;
+                #if defined(SIGNALPOST_CRT_LOW)
+                    half bayer = 0.0h;
+                #else
+                    half bayer = Bayer4x4(ditherCoord) - 0.5h;
+                #endif
                 half ditheredLuma = saturate(luma + bayer * _BayerStrength);
                 half gate = smoothstep(_Threshold - _Softness, _Threshold + _Softness, ditheredLuma);
                 color = lerp(color * _Darken, color, gate);
 
                 half scan = 1.0h - (_ScanlineStrength * (0.5h + 0.5h * sin((uv.y + _UnscaledTime * 0.2h) * _ScanlineDensity)));
                 half flicker = 1.0h + ((frac(_UnscaledTime * 120.0h)) - 0.5h) * _FlickerStrength;
-                half noise = (Hash21(uv * _ScreenParams.xy + float2(_UnscaledTime, _UnscaledTime) * 73.1h) - 0.5h) * _NoiseStrength;
+                #if defined(SIGNALPOST_CRT_LOW)
+                    half noise = 0.0h;
+                #else
+                    half noise = (Hash21(uv * _ScreenParams.xy + float2(_UnscaledTime, _UnscaledTime) * 73.1h) - 0.5h) * _NoiseStrength;
+                #endif
 
                 half2 v = uv * (1.0h - uv.yx);
                 half vignette = pow(saturate(v.x * v.y * 16.0h), 0.18h);
@@ -193,6 +228,7 @@ Shader "/SignalPost/CRTThreshold"
                 color *= _ColorTint.rgb;
 
                 return half4(saturate(color), 1.0h);
+                #endif
             }
             ENDHLSL
         }
