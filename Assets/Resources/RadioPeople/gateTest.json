@@ -1,0 +1,37 @@
+{
+  "id": "gateTest",
+  "speaker": "Civilian",
+  "voice": "Man",
+  "startNode": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "text": "Operator, can you hear me? I need to get through the gate. I am going home.",
+      "answers": [
+        {
+          "text": "Ask where he is coming from",
+          "reply": "The village up the road. I have been walking since morning.",
+          "nextNode": "decision"
+        },
+        {
+          "text": "Let him through",
+          "reply": "Thank you, operator. I will keep moving.",
+          "nextNode": ""
+        },
+        {
+          "text": "Do not let him through",
+          "reply": "All this way for nothing? Fine. I am leaving.",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "decision",
+      "text": "Can I pass?",
+      "answers": [
+        { "text": "Let him through", "reply": "Thank you, operator. I will keep moving.", "nextNode": "" },
+        { "text": "Do not let him through", "reply": "All this way for nothing? Fine. I am leaving.", "nextNode": "" }
+      ]
+    }
+  ]
+}

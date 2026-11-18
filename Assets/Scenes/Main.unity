@@ -130863,6 +130863,61 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bfb7d6fc5901416439240d99d05d6713, type: 3}
+--- !u!1 &2099900001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2099900002}
+  - component: {fileID: 2099900003}
+  m_Layer: 0
+  m_Name: Gate Visitor Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2099900002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099900001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 294.564, y: 246.18, z: 728}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2099900003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099900001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe8195523a774b229b1a5ccfc0313203, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GateVisitorTest
+  visitorPrefab: {fileID: 1956151047072773784, guid: dbc4b5e1bead91746a50d06a4e2899d5, type: 3}
+  dialogueController: {fileID: 9100000, guid: e99ffcea6b894acaba4fec85f237362f, type: 2}
+  radio: {fileID: 1952425693}
+  buttons: {fileID: 1821559863}
+  leftGate: {fileID: 1205657358}
+  rightGate: {fileID: 663159477}
+  startPoint: {x: 0, y: 0, z: 28}
+  waitingPoint: {x: 0, y: 0, z: 3.2}
+  exitPoint: {x: 0, y: 0, z: -10}
+  walkSpeed: 1.3
+  startDelay: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -131074,3 +131129,4 @@ SceneRoots:
   - {fileID: 755241617}
   - {fileID: 257646334}
   - {fileID: 1751429830}
+  - {fileID: 2099900002}
