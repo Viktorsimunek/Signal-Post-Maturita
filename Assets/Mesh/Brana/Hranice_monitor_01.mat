@@ -94,12 +94,12 @@ Material:
     - _Cull: 2
     - _Curvature: 0.06
     - _Cutoff: 0.5
-    - _Darken: 0.629
+    - _Darken: 0.361
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _EmissionStrength: 4.5
+    - _EmissionStrength: 8
     - _EnvironmentReflections: 1
     - _FlickerStrength: 0.03
     - _FresnelStrength: 0.65
@@ -111,16 +111,16 @@ Material:
     - _LineJitterStrength: 0.0056
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseStrength: 0.025
+    - _NoiseStrength: 0.0091
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _ScanlineDensity: 249
+    - _ScanlineDensity: 481
     - _ScanlineStrength: 0.919
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
-    - _Softness: 0.106
+    - _Softness: 0.067
     - _SpecularHighlights: 1
     - _SpecularStrength: 1.2
     - _SrcBlend: 1
@@ -128,7 +128,7 @@ Material:
     - _Surface: 0
     - _SyncDriftSpeed: 2.1
     - _SyncDriftStrength: 0.0022
-    - _Threshold: 0.08
+    - _Threshold: 0.052
     - _UVSec: 0
     - _VerticalJitterSpeed: 0.83
     - _VerticalJitterStrength: 0.00893
