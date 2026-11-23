@@ -26,6 +26,9 @@ public class GateVisitorTest : MonoBehaviour
     private bool waiting;
     private bool allowed;
     private bool gateCached;
+    private float movementBlend;
+    private bool wasSpeaking;
+    private CharacterTurn turner;
 
     private void OnEnable()
     {
@@ -52,13 +55,16 @@ public class GateVisitorTest : MonoBehaviour
         if (animator == null) yield break;
         animator.applyRootMotion = false;
         movementController = animator.runtimeAnimatorController;
+        turner = animator.gameObject.AddComponent<CharacterTurn>();
 
         yield return MoveTo(transform.TransformPoint(waitingPoint));
-        visitor.transform.rotation = Quaternion.LookRotation(-transform.forward);
+        yield return turner.TurnTo(visitor.transform, Quaternion.LookRotation(-transform.forward));
+        yield return new WaitForSeconds(0.5f);
         while (radio.HasActivePerson || !LightsPowerGrid.IsPowered) yield return null;
 
         if (dialogueController != null)
         {
+            animator.speed = 1f;
             animator.runtimeAnimatorController = dialogueController;
             animator.SetBool("Talking", true);
         }
@@ -66,6 +72,23 @@ public class GateVisitorTest : MonoBehaviour
         radio.PersonCame(PersonId);
     }
 
+    private void Update()
+    {
+        if (animator == null) return;
+        if (animator.runtimeAnimatorController == movementController)
+        {
+            if (turner != null && turner.IsTurning) return;
+            animator.speed = walkSpeed / 1.55f;
+            animator.SetFloat("Speed", movementBlend, 0.3f, Time.deltaTime);
+        }
+        else if (waiting && dialogueController != null)
+        {
+            bool speaking = radio.IsSpeaking;
+            if (speaking && !wasSpeaking) animator.SetInteger("TalkVariant", Random.Range(0, 2));
+            animator.SetBool("Talking", speaking);
+            wasSpeaking = speaking;
+        }
+    }
     private void OnDecision(Buttons.ButtonType decision)
     {
         if (!waiting || !radio.HasActivePerson) return;
@@ -86,7 +109,7 @@ public class GateVisitorTest : MonoBehaviour
         {
             animator.SetBool("Talking", false);
             animator.SetTrigger("Disappointed");
-            yield return new WaitForSeconds(4.5f);
+            yield return new WaitForSeconds(5.1f);
         }
 
         animator.runtimeAnimatorController = movementController;
@@ -99,19 +122,24 @@ public class GateVisitorTest : MonoBehaviour
 
     private IEnumerator MoveTo(Vector3 destination)
     {
-        animator.SetFloat("Speed", 1f);
+        movementBlend = 0f;
+        Vector3 facing = destination - visitor.transform.position;
+        facing.y = 0f;
+        if (facing.sqrMagnitude > 0.001f)
+            yield return turner.TurnTo(visitor.transform, Quaternion.LookRotation(facing));
+        movementBlend = 1f;
         while (true)
         {
             Vector3 direction = destination - visitor.transform.position;
             direction.y = 0f;
-            if (direction.magnitude < 0.1f) break;
-            visitor.transform.rotation = Quaternion.RotateTowards(visitor.transform.rotation,
-                Quaternion.LookRotation(direction), 240f * Time.deltaTime);
-            Vector3 next = visitor.transform.position + direction.normalized * Mathf.Min(walkSpeed * Time.deltaTime, direction.magnitude);
+            if (direction.magnitude < 0.03f) break;
+            movementBlend = Mathf.Clamp01(direction.magnitude / 0.65f);
+            float speed = animator.GetFloat("Speed") * walkSpeed;
+            Vector3 next = visitor.transform.position + direction.normalized * Mathf.Min(speed * Time.deltaTime, direction.magnitude);
             visitor.transform.position = GroundPoint(next);
             yield return null;
         }
-        animator.SetFloat("Speed", 0f);
+        movementBlend = 0f;
     }
 
     private IEnumerator MoveGate(bool open)

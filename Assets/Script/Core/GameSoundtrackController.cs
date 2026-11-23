@@ -297,75 +297,16 @@ public class GameSoundtrackController : MonoBehaviour
 
     private IEnumerator CrossfadeRoutine(AudioSource previousSource, AudioSource nextSource, float targetVolume, float duration)
     {
-        float previousStartVolume = previousSource != null ? previousSource.volume : 0f;
-
-        if (duration <= 0.0001f)
-        {
-            if (previousSource != null)
-            {
-                previousSource.Stop();
-                previousSource.volume = 0f;
-            }
-
-            nextSource.volume = targetVolume;
-            fadeRoutine = null;
-            yield break;
-        }
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float progress = Mathf.Clamp01(elapsed / duration);
-            progress = progress * progress * (3f - 2f * progress);
-
-            if (previousSource != null)
-            {
-                previousSource.volume = Mathf.Lerp(previousStartVolume, 0f, progress);
-            }
-
-            nextSource.volume = Mathf.Lerp(0f, targetVolume, progress);
-            yield return null;
-        }
-
-        if (previousSource != null)
-        {
-            previousSource.Stop();
-            previousSource.volume = 0f;
-        }
-
-        nextSource.volume = targetVolume;
+        yield return AudioEffects.Crossfade(previousSource, nextSource, targetVolume, duration);
         fadeRoutine = null;
     }
 
     private IEnumerator StopRoutine(float duration)
     {
         AudioSource source = activeSource;
-        if (source == null)
-        {
-            yield break;
-        }
-
-        float startVolume = source.volume;
-        if (duration <= 0.0001f)
-        {
-            source.Stop();
-            source.volume = 0f;
-            fadeRoutine = null;
-            yield break;
-        }
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float progress = Mathf.Clamp01(elapsed / duration);
-            source.volume = Mathf.Lerp(startVolume, 0f, progress);
-            yield return null;
-        }
-
-        source.Stop();
-        source.volume = 0f;
+        if (source == null) yield break;
+        yield return AudioEffects.FadeVolume(source, 0f, duration);
+        if (source != null) source.Stop();
         fadeRoutine = null;
     }
 

@@ -345,9 +345,9 @@ public partial class MenuManager
             return;
         }
 
-        targetMixer.SetFloat(masterVolumeParam, LinearToDecibels(GameSettings.MasterVolume));
-        targetMixer.SetFloat(musicVolumeParam, LinearToDecibels(GameSettings.MusicVolume));
-        targetMixer.SetFloat(sfxVolumeParam, LinearToDecibels(GameSettings.SfxVolume));
+        targetMixer.SetFloat(masterVolumeParam, AudioEffects.ToDecibels(GameSettings.MasterVolume));
+        targetMixer.SetFloat(musicVolumeParam, AudioEffects.ToDecibels(GameSettings.MusicVolume));
+        targetMixer.SetFloat(sfxVolumeParam, AudioEffects.ToDecibels(GameSettings.SfxVolume));
     }
 
     private static string FormatPercent(float value)
@@ -513,9 +513,4 @@ public partial class MenuManager
         colorAdjustments.postExposure.value = Mathf.Lerp(-1f, 1f, GameSettings.Brightness);
     }
 
-    private static float LinearToDecibels(float value)
-    {
-        float clamped = Mathf.Clamp(value, 0.0001f, 1f);
-        return Mathf.Log10(clamped) * 20f;
-    }
 }

@@ -1,4 +1,3 @@
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -99,7 +98,7 @@ public class InGamePauseMenu : MonoBehaviour
     private float originalCanvasPlaneDistance;
     private int originalCanvasSortingOrder;
     private bool restoreCanvasAfterCloseVisuals;
-    private readonly StringBuilder menuTextBuilder = new StringBuilder(256);
+    private readonly TextShuffle shuffle = new TextShuffle();
 
     public bool IsOpen => isOpen;
 
@@ -542,9 +541,9 @@ public class InGamePauseMenu : MonoBehaviour
             return;
         }
 
-        targetMixer.SetFloat(masterVolumeParam, LinearToDecibels(GameSettings.MasterVolume));
-        targetMixer.SetFloat(musicVolumeParam, LinearToDecibels(GameSettings.MusicVolume));
-        targetMixer.SetFloat(sfxVolumeParam, LinearToDecibels(GameSettings.SfxVolume));
+        targetMixer.SetFloat(masterVolumeParam, AudioEffects.ToDecibels(GameSettings.MasterVolume));
+        targetMixer.SetFloat(musicVolumeParam, AudioEffects.ToDecibels(GameSettings.MusicVolume));
+        targetMixer.SetFloat(sfxVolumeParam, AudioEffects.ToDecibels(GameSettings.SfxVolume));
     }
 
     private void RenderMenu()
@@ -583,7 +582,7 @@ public class InGamePauseMenu : MonoBehaviour
 
         if (isShufflingMenu)
         {
-            menuText.text = BuildScrambledText(menuTargetText, 0f);
+            menuText.text = shuffle.Build(menuTargetText, 0f, shuffleCharacters);
         }
         else
         {
@@ -610,49 +609,13 @@ public class InGamePauseMenu : MonoBehaviour
 
         menuShuffleElapsed += Time.unscaledDeltaTime;
         float progress = Mathf.Clamp01(menuShuffleElapsed / menuShuffleDuration);
-        menuText.text = BuildScrambledText(menuTargetText, progress);
+        menuText.text = shuffle.Build(menuTargetText, progress, shuffleCharacters);
 
         if (progress >= 1f)
         {
             isShufflingMenu = false;
             menuText.text = menuTargetText;
         }
-    }
-
-    private string BuildScrambledText(string targetText, float progress)
-    {
-        if (string.IsNullOrEmpty(targetText))
-        {
-            return string.Empty;
-        }
-
-        if (progress >= 1f || string.IsNullOrEmpty(shuffleCharacters))
-        {
-            return targetText;
-        }
-
-        int revealCount = Mathf.FloorToInt(targetText.Length * progress);
-        menuTextBuilder.Clear();
-
-        for (int i = 0; i < targetText.Length; i++)
-        {
-            char targetCharacter = targetText[i];
-            if (i < revealCount || ShouldKeepCharacterVisible(targetCharacter))
-            {
-                menuTextBuilder.Append(targetCharacter);
-                continue;
-            }
-
-            int shuffleIndex = Mathf.Abs((Time.frameCount * 17) + (i * 31)) % shuffleCharacters.Length;
-            menuTextBuilder.Append(shuffleCharacters[shuffleIndex]);
-        }
-
-        return menuTextBuilder.ToString();
-    }
-
-    private static bool ShouldKeepCharacterVisible(char value)
-    {
-        return char.IsWhiteSpace(value) || char.IsPunctuation(value) || char.IsSymbol(value);
     }
 
     private string GetItemLabel(string item)
@@ -931,12 +894,6 @@ public class InGamePauseMenu : MonoBehaviour
     private string FormatFpsLimit()
     {
         return GameSettings.FpsLimit == 0 ? "UNLIMITED" : GameSettings.FpsLimit.ToString();
-    }
-
-    private static float LinearToDecibels(float value)
-    {
-        float clamped = Mathf.Clamp(value, 0.0001f, 1f);
-        return Mathf.Log10(clamped) * 20f;
     }
 
 }

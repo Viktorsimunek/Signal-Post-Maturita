@@ -88,7 +88,7 @@ public partial class TerminalPowerController
 
         if (terminalCanvasGroup != null)
         {
-            yield return StartCoroutine(FadeCanvasGroupAlpha(1f, 0f, fadeDuration));
+            yield return StartCoroutine(CanvasFade.Run(terminalCanvasGroup, 1f, 0f, fadeDuration, true));
         }
 
         lastBootTimestamp = GetWorldTime01();
@@ -98,7 +98,7 @@ public partial class TerminalPowerController
 
         if (terminalCanvasGroup != null)
         {
-            yield return StartCoroutine(FadeCanvasGroupAlpha(0f, 1f, fadeDuration));
+            yield return StartCoroutine(CanvasFade.Run(terminalCanvasGroup, 0f, 1f, fadeDuration, true));
         }
 
         if (terminalControl != null)
@@ -361,20 +361,7 @@ public partial class TerminalPowerController
 
     private IEnumerator TypeText(TMP_Text target, string content)
     {
-        if (target == null)
-        {
-            yield break;
-        }
-
-        target.text = string.Empty;
-
-        for (int i = 0; i < content.Length; i++)
-        {
-            target.text = content.Substring(0, i + 1);
-            yield return new WaitForSecondsRealtime(typeDelay);
-        }
-
-        target.text = content;
+        yield return Typewriter.Write(target, content, typeDelay);
     }
 
     private void SetPoweredObjects(bool enabled)
@@ -523,25 +510,9 @@ public partial class TerminalPowerController
         Color toEmissionColor,
         float duration)
     {
-        if (duration <= 0.0001f)
-        {
-            SetMonitorTint(toBaseColor, toEmissionColor);
-            yield break;
-        }
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            t = t * t * (3f - 2f * t);
-            SetMonitorTint(
-                Color.Lerp(fromBaseColor, toBaseColor, t),
-                Color.Lerp(fromEmissionColor, toEmissionColor, t));
-            yield return null;
-        }
-
-        SetMonitorTint(toBaseColor, toEmissionColor);
+        yield return Fade.Value(0f, 1f, duration, progress => SetMonitorTint(
+            Color.Lerp(fromBaseColor, toBaseColor, progress),
+            Color.Lerp(fromEmissionColor, toEmissionColor, progress)), smooth: true);
     }
 
     private void ForceMonitorRender(Color clearColor)
@@ -592,6 +563,7 @@ public partial class TerminalPowerController
     {
         if (mainText != null)
         {
+            mainText.maxVisibleCharacters = int.MaxValue;
             mainText.text = content;
         }
     }
@@ -600,6 +572,7 @@ public partial class TerminalPowerController
     {
         if (statusText != null)
         {
+            statusText.maxVisibleCharacters = int.MaxValue;
             statusText.text = content;
         }
     }
@@ -608,6 +581,7 @@ public partial class TerminalPowerController
     {
         if (eventText != null)
         {
+            eventText.maxVisibleCharacters = int.MaxValue;
             eventText.text = content;
         }
     }

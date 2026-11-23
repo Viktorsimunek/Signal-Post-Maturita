@@ -231,24 +231,11 @@ public class CreditsController : MonoBehaviour
         float fromVolume = musicSource != null ? musicSource.volume : 0f;
         float time = Mathf.Max(0.01f, fadeOutTime);
 
-        for (float t = 0f; t < time; t += Time.unscaledDeltaTime)
+        yield return global::Fade.Value(0f, 1f, time, progress =>
         {
-            float p = Mathf.SmoothStep(0f, 1f, t / time);
-            SetAlpha(Mathf.Lerp(fromAlpha, 0f, p));
-
-            if (musicSource != null)
-            {
-                musicSource.volume = Mathf.Lerp(fromVolume, 0f, p);
-            }
-
-            yield return null;
-        }
-
-        SetAlpha(0f);
-        if (musicSource != null)
-        {
-            musicSource.volume = 0f;
-        }
+            SetAlpha(Mathf.Lerp(fromAlpha, 0f, progress));
+            if (musicSource != null) musicSource.volume = Mathf.Lerp(fromVolume, 0f, progress);
+        }, smooth: true);
 
         SceneManager.LoadScene(menuScene);
     }
@@ -260,17 +247,7 @@ public class CreditsController : MonoBehaviour
             SetAlpha(to);
             yield break;
         }
-
-        for (float t = 0f; t < time && !leaving; t += Time.unscaledDeltaTime)
-        {
-            SetAlpha(Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / time)));
-            yield return null;
-        }
-
-        if (!leaving)
-        {
-            SetAlpha(to);
-        }
+        yield return global::Fade.Value(from, to, time, SetAlpha, smooth: true, cancelled: () => leaving);
     }
 
     private IEnumerator FlashScan()

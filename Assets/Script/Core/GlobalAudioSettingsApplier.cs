@@ -51,14 +51,9 @@ public class GlobalAudioSettingsApplier : MonoBehaviour
             return;
         }
 
-        targetMixer.SetFloat(masterVolumeParam, LinearToDecibels(GameSettings.MasterVolume));
-        targetMixer.SetFloat(musicVolumeParam, LinearToDecibels(GameSettings.MusicVolume));
-        targetMixer.SetFloat(sfxVolumeParam, LinearToDecibels(GameSettings.SfxVolume));
+        targetMixer.SetFloat(masterVolumeParam, AudioEffects.ToDecibels(GameSettings.MasterVolume));
+        targetMixer.SetFloat(musicVolumeParam, AudioEffects.ToDecibels(GameSettings.MusicVolume));
+        targetMixer.SetFloat(sfxVolumeParam, AudioEffects.ToDecibels(GameSettings.SfxVolume));
     }
 
-    private static float LinearToDecibels(float value)
-    {
-        float clamped = Mathf.Clamp(value, 0.0001f, 1f);
-        return Mathf.Log10(clamped) * 20f;
-    }
 }

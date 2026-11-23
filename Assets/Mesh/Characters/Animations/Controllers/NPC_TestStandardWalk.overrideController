@@ -1,0 +1,13 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: NPC_TestStandardWalk
+  m_Controller: {fileID: 9100000, guid: 3ff5963594b94b368b77abde5b2dc40e, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 71a232cbf4bfed54496961bb947e947d, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: c7b7827d334431545bc2f096fb3c3899, type: 2}

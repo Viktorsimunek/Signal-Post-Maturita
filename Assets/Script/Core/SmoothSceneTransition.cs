@@ -174,7 +174,7 @@ public class SmoothSceneTransition : MonoBehaviour
 
         if (audioMixer != null && !string.IsNullOrWhiteSpace(audioVolumeParam))
         {
-            audioMixer.SetFloat(audioVolumeParam, LinearToDecibels(quietVolume));
+            audioMixer.SetFloat(audioVolumeParam, AudioEffects.ToDecibels(quietVolume));
         }
 
         Scene loadedScene = SceneManager.GetSceneByName(targetScene);
@@ -296,34 +296,10 @@ public class SmoothSceneTransition : MonoBehaviour
 
     private static IEnumerator FadeMixerVolume(AudioMixer mixer, string parameter, float from, float to, float duration)
     {
-        if (mixer == null || string.IsNullOrWhiteSpace(parameter))
-        {
-            yield break;
-        }
-
-        if (duration <= 0.0001f)
-        {
-            mixer.SetFloat(parameter, LinearToDecibels(to));
-            yield break;
-        }
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            t = t * t * (3f - 2f * t);
-            mixer.SetFloat(parameter, LinearToDecibels(Mathf.Lerp(from, to, t)));
-            yield return null;
-        }
-
-        mixer.SetFloat(parameter, LinearToDecibels(to));
-    }
-
-    private static float LinearToDecibels(float value)
-    {
-        float clamped = Mathf.Clamp(value, 0.0001f, 1f);
-        return Mathf.Log10(clamped) * 20f;
+        if (mixer == null || string.IsNullOrWhiteSpace(parameter)) yield break;
+        yield return Fade.Value(from, to, duration,
+            volume => mixer.SetFloat(parameter, AudioEffects.ToDecibels(volume)),
+            smooth: true, cancelled: () => mixer == null);
     }
 
 }

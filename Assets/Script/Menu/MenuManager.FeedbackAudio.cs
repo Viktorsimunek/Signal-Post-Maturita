@@ -174,31 +174,10 @@ public partial class MenuManager
 
     private IEnumerator FadeMenuMusicRoutine(bool audible)
     {
-        if (audible && !menuMusicSource.isPlaying)
-        {
-            menuMusicSource.Play();
-        }
-
-        float startVolume = menuMusicSource.volume;
-        float targetVolume = audible ? GetMenuMusicTargetVolume() : 0f;
-        float duration = Mathf.Max(0.01f, menuMusicFadeDuration);
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            menuMusicSource.volume = Mathf.Lerp(startVolume, targetVolume, t);
-            yield return null;
-        }
-
-        menuMusicSource.volume = targetVolume;
-
-        if (!audible)
-        {
-            menuMusicSource.Stop();
-        }
-
+        if (audible && !menuMusicSource.isPlaying) menuMusicSource.Play();
+        float volume = audible ? GetMenuMusicTargetVolume() : 0f;
+        yield return AudioEffects.FadeVolume(menuMusicSource, volume, Mathf.Max(0.01f, menuMusicFadeDuration));
+        if (!audible) menuMusicSource.Stop();
         menuMusicFadeRoutine = null;
     }
 

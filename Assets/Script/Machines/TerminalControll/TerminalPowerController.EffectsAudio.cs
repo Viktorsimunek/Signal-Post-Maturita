@@ -25,37 +25,11 @@ public partial class TerminalPowerController
         float fadeInDuration = duration * 0.65f;
         float startAlpha = terminalCanvasGroup.alpha;
 
-        yield return StartCoroutine(FadeCanvasGroupAlpha(startAlpha, blinkMinAlpha, fadeOutDuration));
-        yield return StartCoroutine(FadeCanvasGroupAlpha(terminalCanvasGroup.alpha, 1f, fadeInDuration));
+        yield return StartCoroutine(CanvasFade.Run(terminalCanvasGroup, startAlpha, blinkMinAlpha, fadeOutDuration, true));
+        yield return StartCoroutine(CanvasFade.Run(terminalCanvasGroup, terminalCanvasGroup.alpha, 1f, fadeInDuration, true));
 
         terminalCanvasGroup.alpha = 1f;
         blinkRoutine = null;
-    }
-
-    private IEnumerator FadeCanvasGroupAlpha(float from, float to, float duration)
-    {
-        if (terminalCanvasGroup == null)
-        {
-            yield break;
-        }
-
-        if (duration <= 0.0001f)
-        {
-            terminalCanvasGroup.alpha = to;
-            yield break;
-        }
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            t = t * t * (3f - 2f * t);
-            terminalCanvasGroup.alpha = Mathf.Lerp(from, to, t);
-            yield return null;
-        }
-
-        terminalCanvasGroup.alpha = to;
     }
 
     private IEnumerator PlayScreenTransition()
@@ -159,49 +133,19 @@ public partial class TerminalPowerController
     private IEnumerator FadeAmbientLoopRoutine(bool shouldPlay, float duration)
     {
         ambientAudioSource.clip = ambientLoopClip;
-
-        if (shouldPlay)
+        if (shouldPlay && ambientLoopClip == null)
         {
-            if (ambientLoopClip == null)
-            {
-                ambientAudioSource.volume = 0f;
-                ambientFadeRoutine = null;
-                yield break;
-            }
-
-            if (!ambientAudioSource.isPlaying)
-            {
-                ambientAudioSource.volume = 0f;
-                ambientAudioSource.Play();
-            }
+            ambientAudioSource.volume = 0f;
+            ambientFadeRoutine = null;
+            yield break;
         }
-
-        float startVolume = ambientAudioSource.volume;
-        float targetVolume = shouldPlay ? ambientVolume : 0f;
-
-        if (duration <= 0.0001f)
+        if (shouldPlay && !ambientAudioSource.isPlaying)
         {
-            ambientAudioSource.volume = targetVolume;
+            ambientAudioSource.volume = 0f;
+            ambientAudioSource.Play();
         }
-        else
-        {
-            float elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                ambientAudioSource.volume = Mathf.Lerp(startVolume, targetVolume, t);
-                yield return null;
-            }
-
-            ambientAudioSource.volume = targetVolume;
-        }
-
-        if (!shouldPlay && ambientAudioSource.isPlaying)
-        {
-            ambientAudioSource.Stop();
-        }
-
+        yield return AudioEffects.FadeVolume(ambientAudioSource, shouldPlay ? ambientVolume : 0f, duration);
+        if (!shouldPlay) ambientAudioSource.Stop();
         ambientFadeRoutine = null;
     }
 }

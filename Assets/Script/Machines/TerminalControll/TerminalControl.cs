@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -58,7 +57,7 @@ public class TerminalControl : MonoBehaviour, IInteractable
     private string focusedPromptTargetText = string.Empty;
     private float focusedPromptShuffleElapsed;
     private bool isShufflingFocusedPrompt;
-    private readonly StringBuilder focusedPromptBuilder = new StringBuilder(64);
+    private readonly TextShuffle shuffle = new TextShuffle();
 
     private Vector3 cachedPlayerPosition;
     private Quaternion cachedPlayerRotation;
@@ -615,7 +614,7 @@ public class TerminalControl : MonoBehaviour, IInteractable
         {
             focusedPromptShuffleElapsed += Time.unscaledDeltaTime;
             float progress = Mathf.Clamp01(focusedPromptShuffleElapsed / focusedPromptShuffleDuration);
-            focusedPromptLabel.text = BuildFocusedPromptScramble(focusedPromptTargetText, progress);
+            focusedPromptLabel.text = shuffle.Build(focusedPromptTargetText, progress, focusedPromptShuffleCharacters);
 
             if (progress >= 1f)
             {
@@ -630,42 +629,6 @@ public class TerminalControl : MonoBehaviour, IInteractable
         {
             focusedPromptLabel.text = focusedPromptTargetText;
         }
-    }
-
-    private string BuildFocusedPromptScramble(string targetText, float progress)
-    {
-        if (string.IsNullOrEmpty(targetText))
-        {
-            return string.Empty;
-        }
-
-        if (progress >= 1f || string.IsNullOrEmpty(focusedPromptShuffleCharacters))
-        {
-            return targetText;
-        }
-
-        int revealCount = Mathf.FloorToInt(targetText.Length * progress);
-        focusedPromptBuilder.Clear();
-
-        for (int i = 0; i < targetText.Length; i++)
-        {
-            char targetCharacter = targetText[i];
-            if (i < revealCount || ShouldKeepFocusedPromptCharacterVisible(targetCharacter))
-            {
-                focusedPromptBuilder.Append(targetCharacter);
-                continue;
-            }
-
-            int shuffleIndex = Mathf.Abs((Time.frameCount * 17) + (i * 31)) % focusedPromptShuffleCharacters.Length;
-            focusedPromptBuilder.Append(focusedPromptShuffleCharacters[shuffleIndex]);
-        }
-
-        return focusedPromptBuilder.ToString();
-    }
-
-    private static bool ShouldKeepFocusedPromptCharacterVisible(char value)
-    {
-        return char.IsWhiteSpace(value) || char.IsPunctuation(value) || char.IsSymbol(value);
     }
 
     private void HideFocusedPromptImmediately()

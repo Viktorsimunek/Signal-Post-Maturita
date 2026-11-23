@@ -1,4 +1,3 @@
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,7 +42,7 @@ public class PlayerInteractionHud : MonoBehaviour
     private string actionHintTargetText = string.Empty;
     private float actionHintShuffleElapsed;
     private bool isShufflingActionHint;
-    private readonly StringBuilder promptBuilder = new StringBuilder(64);
+    private readonly TextShuffle shuffle = new TextShuffle();
 
     public void Configure(PlayerInteractor targetInteractor)
     {
@@ -263,7 +262,7 @@ public class PlayerInteractionHud : MonoBehaviour
         {
             promptShuffleElapsed += Time.unscaledDeltaTime;
             float progress = Mathf.Clamp01(promptShuffleElapsed / promptShuffleDuration);
-            promptLabel.text = BuildScrambledText(promptTargetText, progress);
+            promptLabel.text = shuffle.Build(promptTargetText, progress, shuffleCharacters);
 
             if (progress >= 1f)
             {
@@ -308,7 +307,7 @@ public class PlayerInteractionHud : MonoBehaviour
         {
             actionHintShuffleElapsed += Time.unscaledDeltaTime;
             float progress = Mathf.Clamp01(actionHintShuffleElapsed / promptShuffleDuration);
-            actionHintLabel.text = BuildScrambledText(actionHintTargetText, progress);
+            actionHintLabel.text = shuffle.Build(actionHintTargetText, progress, shuffleCharacters);
 
             if (progress >= 1f)
             {
@@ -323,42 +322,6 @@ public class PlayerInteractionHud : MonoBehaviour
         {
             actionHintLabel.text = actionHintTargetText;
         }
-    }
-
-    private string BuildScrambledText(string targetText, float progress)
-    {
-        if (string.IsNullOrEmpty(targetText))
-        {
-            return string.Empty;
-        }
-
-        if (progress >= 1f || string.IsNullOrEmpty(shuffleCharacters))
-        {
-            return targetText;
-        }
-
-        int revealCount = Mathf.FloorToInt(targetText.Length * progress);
-        promptBuilder.Clear();
-
-        for (int i = 0; i < targetText.Length; i++)
-        {
-            char targetCharacter = targetText[i];
-            if (i < revealCount || ShouldKeepCharacterVisible(targetCharacter))
-            {
-                promptBuilder.Append(targetCharacter);
-                continue;
-            }
-
-            int shuffleIndex = Mathf.Abs((Time.frameCount * 17) + (i * 31)) % shuffleCharacters.Length;
-            promptBuilder.Append(shuffleCharacters[shuffleIndex]);
-        }
-
-        return promptBuilder.ToString();
-    }
-
-    private static bool ShouldKeepCharacterVisible(char value)
-    {
-        return char.IsWhiteSpace(value) || char.IsPunctuation(value) || char.IsSymbol(value);
     }
 
     private void HidePromptImmediately()

@@ -198,41 +198,8 @@ public partial class MenuManager
 
     private IEnumerator TypeText(TMP_Text label, string target, float delay, bool keepHintVisible)
     {
-        if (label == null)
-        {
-            yield break;
-        }
-
-        if (skipIntroRequested)
-        {
-            label.text = target;
-            yield break;
-        }
-
-        label.text = string.Empty;
-        for (int i = 0; i < target.Length; i++)
-        {
-            if (skipIntroRequested)
-            {
-                label.text = target;
-                yield break;
-            }
-
-            label.text = target.Substring(0, i + 1);
-
-            if (keepHintVisible && i < target.Length - 1 && target.EndsWith(splashSkipHint, StringComparison.Ordinal))
-            {
-                int hintIndex = target.LastIndexOf(splashSkipHint, StringComparison.Ordinal);
-                if (i + 1 < hintIndex)
-                {
-                    label.text = target.Substring(0, i + 1) + "\n\n" + splashSkipHint;
-                }
-            }
-
-            yield return new WaitForSecondsRealtime(delay);
-        }
-
-        label.text = target;
+        yield return Typewriter.Write(label, target, delay,
+            skip: () => skipIntroRequested, hint: keepHintVisible ? splashSkipHint : null);
     }
 
     private bool WasIntroSkipPressed()
@@ -328,34 +295,9 @@ public partial class MenuManager
 
     private IEnumerator FadeTextAlpha(TMP_Text label, float from, float to, float duration)
     {
-        if (label == null)
-        {
-            yield break;
-        }
-
-        if (duration <= 0.0001f)
-        {
-            SetTextAlpha(label, to);
-            yield break;
-        }
-
-        SetTextAlpha(label, from);
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            if (skipIntroRequested)
-            {
-                SetTextAlpha(label, to);
-                yield break;
-            }
-
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            SetTextAlpha(label, Mathf.Lerp(from, to, t));
-            yield return null;
-        }
-
+        if (label == null) yield break;
+        yield return Fade.Value(from, to, duration, alpha => SetTextAlpha(label, alpha),
+            cancelled: () => skipIntroRequested || label == null);
         SetTextAlpha(label, to);
     }
 
@@ -373,33 +315,11 @@ public partial class MenuManager
 
     private IEnumerator FadeIntroAudio(float from, float to, float duration)
     {
-        if (duration <= 0.0001f)
+        yield return Fade.Value(from, to, duration, volume =>
         {
-            GameSettings.SetMasterVolume(to);
+            GameSettings.SetMasterVolume(volume);
             ApplyMixerVolumes();
-            yield break;
-        }
-
-        float elapsed = 0f;
-        GameSettings.SetMasterVolume(from);
-        ApplyMixerVolumes();
-
-        while (elapsed < duration)
-        {
-            if (skipIntroRequested)
-            {
-                GameSettings.SetMasterVolume(to);
-                ApplyMixerVolumes();
-                yield break;
-            }
-
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            GameSettings.SetMasterVolume(Mathf.Lerp(from, to, t));
-            ApplyMixerVolumes();
-            yield return null;
-        }
-
+        }, cancelled: () => skipIntroRequested);
         GameSettings.SetMasterVolume(to);
         ApplyMixerVolumes();
     }

@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class EndingSequenceController : MonoBehaviour
@@ -68,8 +67,8 @@ public class EndingSequenceController : MonoBehaviour
         }
 
         StopEndingMusic();
-        yield return BlackScreen.FadeTo(1f, fadeDuration);
-        BlackScreen.FadeOutAfterNextSceneLoad(creditsRevealFadeDuration);
+        yield return ScreenFade.To(1f, fadeDuration);
+        ScreenFade.RevealOnNextScene(creditsRevealFadeDuration);
 
         endingRoutine = null;
         SceneManager.LoadScene(creditsScene);
@@ -113,87 +112,4 @@ public class EndingSequenceController : MonoBehaviour
         return fuses;
     }
 
-    private static class BlackScreen
-    {
-        private static BlackScreenRunner runner;
-        private static CanvasGroup canvasGroup;
-        private static float revealDuration;
-
-        public static IEnumerator FadeTo(float targetAlpha, float duration)
-        {
-            EnsureCanvas();
-
-            if (duration <= 0.0001f)
-            {
-                canvasGroup.alpha = targetAlpha;
-                yield break;
-            }
-
-            float startAlpha = canvasGroup.alpha;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, Mathf.Clamp01(elapsed / duration));
-                yield return null;
-            }
-
-            canvasGroup.alpha = targetAlpha;
-        }
-
-        public static void FadeOutAfterNextSceneLoad(float duration)
-        {
-            EnsureCanvas();
-            revealDuration = Mathf.Max(0f, duration);
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
-            SceneManager.sceneLoaded += HandleSceneLoaded;
-        }
-
-        private static void EnsureCanvas()
-        {
-            if (canvasGroup != null)
-            {
-                return;
-            }
-
-            GameObject root = new GameObject("EndingFadeCanvas");
-            Object.DontDestroyOnLoad(root);
-            runner = root.AddComponent<BlackScreenRunner>();
-
-            Canvas canvas = root.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = short.MaxValue;
-
-            canvasGroup = root.AddComponent<CanvasGroup>();
-            canvasGroup.alpha = 0f;
-
-            GameObject fadeImageObject = new GameObject("Fade");
-            fadeImageObject.transform.SetParent(root.transform, false);
-
-            RectTransform rectTransform = fadeImageObject.AddComponent<RectTransform>();
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
-
-            Image fadeImage = fadeImageObject.AddComponent<Image>();
-            fadeImage.color = Color.black;
-        }
-
-        private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
-            EnsureCanvas();
-
-            if (runner != null)
-            {
-                runner.StartCoroutine(FadeTo(0f, revealDuration));
-            }
-        }
-    }
-
-    private class BlackScreenRunner : MonoBehaviour
-    {
-    }
 }

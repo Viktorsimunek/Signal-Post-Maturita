@@ -428,17 +428,7 @@ public class Lights : MonoBehaviour
         ambientAudioSource.clip = ambientLoopClip;
         if (play && ambientLoopClip == null) yield break;
         if (play && !ambientAudioSource.isPlaying) ambientAudioSource.Play();
-
-        float start = ambientAudioSource.volume;
-        float target = play ? ambientVolume : 0f;
-
-        for (float t = 0f; t < time; t += Time.deltaTime)
-        {
-            ambientAudioSource.volume = Mathf.Lerp(start, target, Mathf.Clamp01(t / time));
-            yield return null;
-        }
-
-        ambientAudioSource.volume = target;
+        yield return AudioEffects.FadeVolume(ambientAudioSource, play ? ambientVolume : 0f, time, unscaled: false);
         if (!play) ambientAudioSource.Stop();
         ambientRoutine = null;
     }
