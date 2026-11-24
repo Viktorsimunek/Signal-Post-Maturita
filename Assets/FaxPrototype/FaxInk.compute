@@ -1,11 +1,13 @@
 #pragma kernel ProcessFax
 
 // Vstup je čistý fax, výstup upravený fax. Nastavení posílá C# při přegenerování.
-Texture2D<float4> Source, PaperTexture, DamageMask;
+Texture2D<float4> Source, PaperTexture, DamageMask, SmudgeMap;
 SamplerState sampler_linear_clamp;
 SamplerState sampler_linear_repeat;
 RWTexture2D<float4> Result;
 float InkBleed, Noise, Dropouts, UnevenInk, Ghosting;
+float SmudgeStrength, SmudgeRadius, SmudgeScale;
+int UseSmudgeMap;
 float Warp, RowJitter, BandShift, PaperMottle, EdgeDirt, Streaks;
 float PaperTextureStrength, DamageStrength;
 float2 PaperTiling, DamageTiling, PaperOffset, DamageOffset;
@@ -14,6 +16,8 @@ float Threshold, ThresholdSoftness, ThresholdBlend;
 int RandomizeDamagePlacement;
 float2 GhostOffset;
 int BleedRadius;
+int UseQuality;
+float Quality;
 uint Seed;
 
 // Stejná pozice + seed = stejný vzor. Nepoužívám čas, fax se nehýbe.
@@ -68,32 +72,71 @@ void ProcessFax(uint3 id : SV_DispatchThreadID)
     uint width, height;
     Source.GetDimensions(width, height);
     if (id.x >= width || id.y >= height) return;
-    float2 size = float2(width, height);
+    // Rozlozeni ma 768x1024 bodu; vyssi rozliseni jen zostri tisk.
+    float renderScale = height / 1024.0;
+    float2 size = float2(width, height) / renderScale;
     float2 texelSize = rcp(size);
-    float2 p = float2(id.xy);
+    float2 p = (float2(id.xy) + 0.5) / renderScale - 0.5;
+    uint2 pixel = (uint2)max(p, 0.0);
     float2 uv = (p + 0.5) * texelSize;
+
+    // Textura tisku je pritomna vzdy; quality ridi hlavne vady prenosu.
+    float wear = UseQuality != 0 ? saturate((1.0 - Quality) / 0.3) : 1.0;
+    float glitchLines = UseQuality != 0 ? saturate((0.7 - Quality) / 0.4) : 0.0;
+    float failure = UseQuality != 0 ? saturate((0.25 - Quality) / 0.25) : 0.0;
+    // Stred skaly musi zustat citelny. Rozpad prudce zesili az blizko nuly.
+    failure *= failure;
+    float collapse = failure * failure;
+    float strong = UseQuality != 0 ? smoothstep(0.3, 1.0, wear) : 0.0;
+    float inkBleed = InkBleed * wear;
+    float noise = Noise * wear;
+    float dropouts = Dropouts * wear;
+    float unevenInk = UnevenInk * wear;
+    float ghosting = Ghosting * wear * (UseQuality != 0 ? lerp(0.12, 1.0, failure) : 1.0);
+    // Jemne zvlneni zustava i pri quality=1; velky warp az u konce skaly.
+    float warp = UseQuality != 0 ? Warp * (0.18 + 0.42 * (1.0 - saturate(Quality)) + 1.4 * failure) : Warp;
+    float rowJitter = RowJitter * wear * (1.0 + strong) * (UseQuality != 0 ? lerp(0.06, 1.0, failure) : 1.0);
+    float bandShift = BandShift * wear * (1.0 + strong) * (UseQuality != 0 ? lerp(0.06, 1.0, failure) : 1.0);
+    float paperMottle = PaperMottle * wear;
+    float edgeDirt = EdgeDirt * wear;
+    float streaks = Streaks * wear * (UseQuality != 0 ? lerp(0.2, 1.0, failure) : 1.0);
+    float paperTextureStrength = PaperTextureStrength * lerp(0.25, 1.0, wear);
+    float damageStrength = DamageStrength * wear;
 
     // 1. DISTORTION – zvlnění papíru, chvění řádků a občas posunutý pás.
     // Vypnuté efekty přeskakuju; jejich šum není potřeba počítat.
     float2 q = p;
-    if (Warp > 0)
+    if (warp > 0)
     {
         float2 displacement = float2(SmoothNoise(p / 90.0), SmoothNoise(p / 90.0 + 137.0));
-        q += (displacement * 2.0 - 1.0) * Warp;
+        q += (displacement * 2.0 - 1.0) * warp;
     }
-    if (RowJitter > 0)
-        q.x += (Random(uint2(17, id.y)) * 2.0 - 1.0) * RowJitter;
-    uint band = id.y / 12;
-    if (BandShift > 0 && Random(uint2(43, band)) < 0.12)
-        q.x += (Random(uint2(97, band)) * 2.0 - 1.0) * BandShift;
+    if (rowJitter > 0)
+        q.x += (Random(uint2(17, pixel.y)) * 2.0 - 1.0) * rowJitter;
+    uint band = pixel.y / 12;
+    if (bandShift > 0 && Random(uint2(43, band)) < 0.12)
+        q.x += (Random(uint2(97, band)) * 2.0 - 1.0) * bandShift;
+
+    // Ztrata synchronizace: cele pasy preskoci jinam, znaky se rozpadnou na bloky.
+    // Vse je odvozene od seedu, zadne blikani pri prohlizeni papiru.
+    if (failure > 0)
+    {
+        uint tornBand = pixel.y / 9;
+        q.x += (Random(uint2(719, tornBand)) * 2.0 - 1.0) * size.x * 0.65 * collapse;
+        q.y += (Random(uint2(331, pixel.y / 21)) * 2.0 - 1.0) * 180.0 * collapse;
+        q.y += (SmoothNoise(p / 37.0 + 419.0) * 2.0 - 1.0) * 55.0 * failure;
+        float2 block = float2(1.0 + 7.0 * collapse, 1.0 + 4.0 * collapse);
+        q = lerp(q, floor(q / block) * block, failure);
+    }
 
     // 2. INKOUST – rozpíjení do okolí, dvojitý otisk a slabší místa tisku.
     float ink = ReadInk(q, size, texelSize);
-    if (InkBleed > 0)
+    float sourceInk = ink;
+    if (inkBleed > 0)
     {
-        // Rozpíjení nemůže být silnější než InkBleed. Tmavší pixel už nezmění.
+        // Rozpíjení nemůže být silnější než inkBleed. Tmavší pixel už nezmění.
         [branch]
-        if (ink < InkBleed)
+        if (ink < inkBleed)
         {
             float nearbyInk = ink; // Střed už mám načtený.
             int radius = clamp(BleedRadius, 1, 3);
@@ -102,40 +145,74 @@ void ProcessFax(uint3 id : SV_DispatchThreadID)
                     if (x != 0 || y != 0)
                         nearbyInk += ReadInk(q + float2(x, y), size, texelSize);
             nearbyInk /= (2 * radius + 1) * (2 * radius + 1);
-            ink = max(ink, nearbyInk * InkBleed * (0.35 + 0.65 * SmoothNoise(p / 6.0)));
+            ink = max(ink, nearbyInk * inkBleed * (0.35 + 0.65 * SmoothNoise(p / 6.0)));
         }
     }
-    if (Ghosting > 0)
-        ink = max(ink, ReadInk(q - GhostOffset, size, texelSize) * Ghosting);
-    if (UnevenInk > 0)
-        ink *= 1.0 - UnevenInk * SmoothNoise(p / 23.0 + 71.0);
-    if (Dropouts > 0 && Random(uint2(id.x / 3, id.y) + uint2(173, 719)) < Dropouts)
+    // Lokalni rozmazani inkoustu PRED thresholdem. Bila maska = smudge.
+    // Bez textury vytvorim plynulou mapu ze seedu; zbytek tisku zustava ostry.
+    if (SmudgeStrength > 0 && SmudgeRadius > 0)
+    {
+        float2 mapUV = (p + 0.5) / size.y * SmudgeScale;
+        float mask = UseSmudgeMap != 0
+            ? SmudgeMap.SampleLevel(sampler_linear_repeat, mapUV, 0).r
+            : smoothstep(0.43, 0.65, Perlin(mapUV + 83.7));
+        float amount = saturate(mask * SmudgeStrength);
+        if (amount > 0.001)
+        {
+            float2 r = float2(SmudgeRadius, SmudgeRadius * 0.65);
+            float blurred = ReadInk(q, size, texelSize) * 4.0;
+            blurred += (ReadInk(q + float2(r.x, 0), size, texelSize)
+                + ReadInk(q - float2(r.x, 0), size, texelSize)
+                + ReadInk(q + float2(0, r.y), size, texelSize)
+                + ReadInk(q - float2(0, r.y), size, texelSize)) * 2.0;
+            blurred += ReadInk(q + r, size, texelSize) + ReadInk(q - r, size, texelSize)
+                + ReadInk(q + float2(r.x, -r.y), size, texelSize)
+                + ReadInk(q + float2(-r.x, r.y), size, texelSize);
+            blurred /= 16.0;
+            // Vlhky inkoust se trochu rozlije, tenke tahy se uplne neztrati.
+            ink = lerp(ink, max(blurred * 1.45, ink * 0.88), amount);
+        }
+    }
+    if (ghosting > 0)
+        ink = max(ink, ReadInk(q - GhostOffset, size, texelSize) * ghosting);
+    if (unevenInk > 0)
+        ink *= 1.0 - unevenInk * SmoothNoise(p / 23.0 + 71.0);
+    if (dropouts > 0 && Random(uint2(pixel.x / 3, pixel.y) + uint2(173, 719)) < dropouts)
         ink *= 0.35;
+
+    if (failure > 0)
+    {
+        // Dlouhe otisky a vynechane kusy radku misto pouheho jemneho sumu.
+        float dragged = ReadInk(q - float2(32.0 * failure, 3.0), size, texelSize);
+        ink = max(ink, dragged * 0.85 * failure);
+        float missing = Random(uint2(pixel.x / 29, pixel.y / 11) + uint2(97, 401));
+        ink *= missing < collapse * 0.72 ? 0.0 : 1.0;
+    }
 
     // 3. PAPÍR – fleky v podkladu, špinavé okraje, pruhy a jemné zrno.
     float paper = 1.0;
-    if (PaperMottle > 0) paper -= SmoothNoise(p / 70.0 + 317.0) * PaperMottle;
+    if (paperMottle > 0) paper -= SmoothNoise(p / 70.0 + 317.0) * paperMottle;
     float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
-    if (EdgeDirt > 0)
-        paper -= (1.0 - smoothstep(0.0, 0.07, edge)) * EdgeDirt * SmoothNoise(p / 12.0);
-    if (Streaks > 0)
+    if (edgeDirt > 0)
+        paper -= (1.0 - smoothstep(0.0, 0.07, edge)) * edgeDirt * SmoothNoise(p / 12.0);
+    if (streaks > 0)
     {
-        float stripe = Random(uint2(id.x / 2, 853));
+        float stripe = Random(uint2(pixel.x / 2, 853));
         stripe *= stripe;
         stripe *= stripe;
         stripe *= stripe;
         stripe *= stripe; // x^16: zvýrazní jen pár pruhů, bez obecné mocniny.
-        paper -= stripe * Streaks;
+        paper -= stripe * streaks;
     }
-    if (Noise > 0) paper -= Random(id.xy + uint2(991, 31)) * Noise;
+    if (noise > 0) paper -= Random(pixel.xy + uint2(991, 31)) * noise;
     float3 paperColor = 1.0;
-    if (PaperTextureStrength > 0)
+    if (paperTextureStrength > 0)
         paperColor = PaperTexture.SampleLevel(sampler_linear_repeat, uv * PaperTiling + PaperOffset, 0).rgb;
 
     // 4. DAMAGE – otočím a posunu texturu, Perlinem ji zvlním a místy zeslabím.
     // Repeat sampler opakuje texturu i mimo UV 0..1, včetně filtrování na švech.
     float damage = 0;
-    if (DamageStrength > 0)
+    if (damageStrength > 0)
     {
         float2 damageUV = (uv - 0.5) * DamageTiling;
         if (RandomizeDamagePlacement != 0)
@@ -161,8 +238,8 @@ void ProcessFax(uint3 id : SV_DispatchThreadID)
     }
 
     // 5. SLOŽENÍ – damage ztmaví papír, na něj přijde inkoust.
-    float3 value = saturate(paper * lerp(float3(1, 1, 1), paperColor, PaperTextureStrength)
-        - damage * DamageStrength) * (1.0 - saturate(ink));
+    float3 value = saturate(paper * lerp(float3(1, 1, 1), paperColor, paperTextureStrength)
+        - damage * damageStrength) * (1.0 - saturate(ink));
     // 6. THRESHOLD – převod na černou/bílou; blend vrací část původních odstínů.
     if (ThresholdBlend > 0)
     {
@@ -170,6 +247,41 @@ void ProcessFax(uint3 id : SV_DispatchThreadID)
         float bw = ThresholdSoftness <= 0.0001 ? step(Threshold, gray)
             : smoothstep(Threshold - ThresholdSoftness, Threshold + ThresholdSoftness, gray);
         value = lerp(value, float3(bw, bw, bw), ThresholdBlend);
+    }
+    // Kopirka: jemne dirky v inkoustu, zrnite okraje a lokalni skvrny.
+    // Meni povrch, ne pozici pismen. Stred papiru zustava prevazne cisty.
+    if (UseQuality != 0)
+    {
+        float edgeShade = (1.0 - smoothstep(0.0, 0.09, edge))
+            * (0.3 + 0.7 * SmoothNoise(p / 87.0 + 513.0));
+        float patches = smoothstep(0.59, 0.79, SmoothNoise(p / 145.0 + 207.0));
+        float density = 0.001 + edgeShade * 0.48 + patches * 0.08;
+        float speckle = step(1.0 - density, Random(id.xy + uint2(811, 79)));
+        value = min(value, (1.0 - speckle * 0.92).xxx);
+        float wornInk = step(0.975, Random(id.xy + uint2(93, 691)))
+            * smoothstep(0.65, 0.95, sourceInk);
+        value = lerp(value, float3(1, 1, 1), wornInk * 0.9);
+    }
+    // Kolem 50 % pribyvaji tenke prerusovane linky, nikoli zvlnene odstavce.
+    if (glitchLines > 0)
+    {
+        uint lineBand = pixel.y / 19;
+        float selectedLine = step(1.0 - glitchLines * 0.5, Random(uint2(971, lineBand)));
+        float thinLine = 1.0 - step(1.0, fmod(p.y, 19.0));
+        float segments = step(0.38, SmoothNoise(float2(p.x / 31.0, lineBand * 7.0)));
+        float mark = selectedLine * thinLine * segments * smoothstep(0.01, 0.04, edge);
+        value = min(value, (1.0 - mark * 0.85).xxx);
+    }
+    if (failure > 0)
+    {
+        // Rozbite cerne pasy a bile vypadky. Pri nule zbydou jen fragmenty zpravy.
+        float inside = smoothstep(0.01, 0.045, edge);
+        float bandNoise = Random(uint2(613, pixel.y / 13));
+        float brokenInk = step(0.12, Random(uint2(pixel.x / 3, pixel.y) + uint2(181, 37)));
+        float blackout = step(1.0 - collapse * 0.72, bandNoise) * inside;
+        value = lerp(value, (1.0 - brokenInk * 0.98).xxx, blackout);
+        float blankBand = step(1.0 - collapse * 0.12, Random(uint2(157, pixel.y / 7)));
+        value = lerp(value, float3(1, 1, 1), blankBand * inside);
     }
     Result[id.xy] = float4(value, 1);
 }

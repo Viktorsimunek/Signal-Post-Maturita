@@ -22,9 +22,16 @@ public class FaxMachine : MonoBehaviour
     [TextArea(3, 8)]
     [SerializeField] private string defaultMessage = "NO SIGNAL";
 
+    [Header("Generovani")]
+    [SerializeField] private FaxRenderer faxRenderer;
+
     [Header("Sound")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip faxSound;
+    [SerializeField] private AudioSource extraAudio;
+    [Range(0, 1)] [SerializeField] private float extraVolume = 0.65f;
+    [SerializeField] private AudioClip[] normalSounds;
+    [SerializeField] private AudioClip[] scarySounds;
     [SerializeField] private float faxVolume = 0.8f;
     [SerializeField] private Vector2 pitchRange = new Vector2(0.95f, 1.05f);
 
@@ -32,6 +39,7 @@ public class FaxMachine : MonoBehaviour
     private readonly List<GameObject> printedPapers = new List<GameObject>();
     private Coroutine printRoutine;
     private bool isPrinting;
+    private GameObject currentPaper;
 
     public bool IsPrinting => isPrinting;
     public bool HasPower => (powerFuse == null || powerFuse.IsOn) && LightsPowerGrid.IsPowered;
@@ -132,7 +140,9 @@ public class FaxMachine : MonoBehaviour
     {
         while (HasPower && messages.Count > 0)
         {
-            yield return PrintPaper(messages.Dequeue());
+            yield return PrintPaper(messages.Peek());
+            if (!HasPower) break;
+            messages.Dequeue();
         }
 
         printRoutine = null;
@@ -152,27 +162,45 @@ public class FaxMachine : MonoBehaviour
         }
 
         isPrinting = true;
+        float soundTime = PlaySound(fax);
+        float duration = Mathf.Max(printTime, soundTime);
+
+        if (!string.IsNullOrWhiteSpace(fax.body) && fax.texture == null)
+        {
+            // Pockame snimek, aby byl po nacteni sceny pripraveny render pipeline.
+            yield return null;
+            if (!HasPower) { StopSound(); isPrinting = false; yield break; }
+            if (faxRenderer == null || faxRenderer.Generate(fax) == null)
+            {
+                Debug.LogError("Fax nema pripraveny renderer nebo se ho nepodarilo vykreslit.", this);
+                StopSound();
+                isPrinting = false;
+                yield break;
+            }
+        }
 
         Transform startPoint = paperSpawnPoint != null ? paperSpawnPoint : transform;
         Transform endPoint = paperEndPoint != null ? paperEndPoint : startPoint;
         GameObject paper = CreatePaper(startPoint);
+        currentPaper = paper;
         printedPapers.Add(paper);
         FaxPaper faxPaper = SetupPaper(paper, fax);
 
-        PlayFaxSound();
-
         float timer = 0f;
-        while (timer < printTime)
+        while (timer < duration)
         {
             if (!HasPower)
             {
-                StopFaxSound();
+                StopSound();
+                printedPapers.Remove(paper);
+                Destroy(paper);
+                currentPaper = null;
                 isPrinting = false;
                 yield break;
             }
 
             timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / printTime);
+            float t = Mathf.Clamp01(timer / duration);
             float printT = GetPrintProgress(t);
             paper.transform.position = Vector3.Lerp(startPoint.position, endPoint.position, printT);
             paper.transform.rotation = Quaternion.Slerp(startPoint.rotation, endPoint.rotation, printT);
@@ -181,8 +209,9 @@ public class FaxMachine : MonoBehaviour
 
         paper.transform.SetPositionAndRotation(endPoint.position, endPoint.rotation);
         faxPaper.SetCanTake(true);
+        currentPaper = null;
         FaxReadyToTake?.Invoke(fax);
-        StopFaxSound();
+        StopSound();
 
         if (paperStayTime > 0f)
         {
@@ -215,7 +244,13 @@ public class FaxMachine : MonoBehaviour
             printRoutine = null;
         }
 
-        StopFaxSound();
+        StopSound();
+        if (currentPaper != null)
+        {
+            printedPapers.Remove(currentPaper);
+            Destroy(currentPaper);
+            currentPaper = null;
+        }
         isPrinting = false;
     }
 
@@ -252,7 +287,7 @@ public class FaxMachine : MonoBehaviour
         return t * t * (3f - 2f * t);
     }
 
-    private void ApplyTexture(GameObject paper, Texture2D texture)
+    private void ApplyTexture(GameObject paper, Texture texture)
     {
         Renderer renderer = paper.GetComponentInChildren<Renderer>();
         if (renderer == null)
@@ -267,26 +302,47 @@ public class FaxMachine : MonoBehaviour
         }
     }
 
-    private void PlayFaxSound()
+    private float PlaySound(FaxMessage fax)
     {
-        if (audioSource == null || faxSound == null)
+        if (audioSource != null && faxSound != null)
         {
-            return;
+            audioSource.clip = faxSound;
+            audioSource.loop = true;
+            audioSource.volume = faxVolume;
+            audioSource.pitch = UnityEngine.Random.Range(pitchRange.x, pitchRange.y);
+            audioSource.Play();
         }
 
-        audioSource.clip = faxSound;
-        audioSource.loop = true;
-        audioSource.volume = faxVolume;
-        audioSource.pitch = UnityEngine.Random.Range(pitchRange.x, pitchRange.y);
-        audioSource.Play();
+        if (extraAudio == null) return 0f;
+        AudioClip[] sounds = normalSounds;
+        if (fax.ScarySound)
+        {
+            sounds = scarySounds;
+        }
+        if (sounds == null || sounds.Length == 0) return 0f;
+        AudioClip clip = sounds[UnityEngine.Random.Range(0, sounds.Length)];
+        if (clip == null) return 0f;
+
+        extraAudio.clip = clip;
+        extraAudio.loop = false;
+        extraAudio.volume = extraVolume;
+        // Pitch 1 zachova data easter eggu ve faxovem zvuku.
+        extraAudio.pitch = 1f;
+        extraAudio.Play();
+        return clip.length;
     }
 
-    private void StopFaxSound()
+    private void StopSound()
     {
-        if (audioSource != null && audioSource.isPlaying)
+        if (audioSource != null)
         {
             audioSource.Stop();
             audioSource.clip = null;
+        }
+        if (extraAudio != null)
+        {
+            extraAudio.Stop();
+            extraAudio.clip = null;
         }
     }
 

@@ -31,6 +31,11 @@ public class HranicniKamery : MonoBehaviour
         foreach (Renderer screen in cctvScreens)
         {
             if (screen == null) continue;
+            if (screen.transform.parent != null)
+            {
+                foreach (Light monitorLight in screen.transform.parent.GetComponentsInChildren<Light>(true))
+                    monitorLight.enabled = powered;
+            }
             screen.GetPropertyBlock(screenBlock);
             screenBlock.SetFloat("_ScreenPower", powered ? 1f : 0f);
             screen.SetPropertyBlock(screenBlock);

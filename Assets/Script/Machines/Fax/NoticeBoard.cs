@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class NoticeBoard : MonoBehaviour
@@ -10,6 +11,8 @@ public class NoticeBoard : MonoBehaviour
     [SerializeField] private TextAsset scheduleJson;
     [SerializeField] private string resourcesJsonName = "FaxSchedule";
     [SerializeField] private string textureFolder = "Faxes/";
+
+    [SerializeField] private FaxRenderer faxRenderer;
 
     [Header("Sound")]
     [SerializeField] private AudioSource audioSource;
@@ -34,6 +37,12 @@ public class NoticeBoard : MonoBehaviour
             audioSource.spatialBlend = 1f;
         }
 
+    }
+
+    private IEnumerator Start()
+    {
+        // Generovane dokumenty obnovujeme az po prvnim snimku.
+        yield return new WaitForEndOfFrame();
         RestorePinnedFaxes();
     }
 
@@ -94,11 +103,13 @@ public class NoticeBoard : MonoBehaviour
         GameObject paper = Instantiate(pinnedPaperPrefab, slot.position, Quaternion.Euler(paperRotation));
         paper.SetActive(true);
         paper.name = string.IsNullOrWhiteSpace(message.title) ? "Pinned Fax" : message.title;
+        if (message.texture == null && !string.IsNullOrWhiteSpace(message.body) && faxRenderer != null)
+            faxRenderer.Generate(message);
         ApplyTexture(paper, message.texture);
         return paper;
     }
 
-    private void ApplyTexture(GameObject paper, Texture2D texture)
+    private void ApplyTexture(GameObject paper, Texture texture)
     {
         Renderer renderer = paper.GetComponentInChildren<Renderer>();
         if (renderer == null)

@@ -2,8 +2,13 @@
   "faxes": [
     {
       "id": "Fax_01",
-      "title": "Intro Fax",
-      "textureName": "Intro_fax",
+      "title": "STATION ENTRY NOTICE",
+      "sender": "FROM: SIGNAL CONTROL / 07",
+      "body": "Operator {PLAYER_NAME},\n\nYour arrival at the station has been confirmed.\nYou have been assigned to the position of Signal Tower Operator. Your previous experience in civilian radio communications will be required here.\n\nThis station plays an important role in maintaining Civil Harmony across the region.\n\nAround the facility you will find notes and instructions explaining how each machine operates. Take some time to familiarize yourself with the environment.\n\nFIRST TRANSMISSION\n\nWhen you are ready, send the message:\n\nCIVIL HARMONY TEST\n\nFrequency: 104.6 MHz\n\nFurther instructions will follow after successful transmission.\n\nServe with discipline. Maintain order.\n\nCIVIL HARMONY",
+      "quality": 0.75,
+      "CH_Logo": true,
+      "ScarySound": false,
+      "seed": 164,
       "time": 10,
       "trigger": ""
     },

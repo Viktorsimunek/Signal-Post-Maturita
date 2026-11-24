@@ -1,0 +1,9 @@
+{
+  "id": "arrival_confirmation",
+  "title": "INCOMING FAX",
+  "sender": "FROM: SIGNAL CONTROL / 07",
+  "body": "INCOMING FAX – INTERNAL USE ONLY\n\nBORDER COMMUNICATIONS STATION – SECTOR 3\n\nPERSONNEL ARRIVAL CONFIRMATION\n\nOperator {PLAYER_NAME},\n\nThe Central Administration has registered the activation of your assigned station.\n\nYour arrival has been confirmed.\n\nWe trust that your previous experience in civilian radio communications will prove valuable in fulfilling your new responsibilities.\n\nAs you have been informed, the National Border Communications Network is currently operating with limited qualified personnel.\n\nYour cooperation is therefore essential.\n\nFrom this moment forward, all transmissions, border authorizations, and operational incidents occurring at this station are your responsibility.\n\nYour performance will be reviewed regularly.\n\nAny errors or irregularities will be documented and forwarded to the appropriate authorities.\n\nWe expect the same level of competence demonstrated in your previous employment.\n\nYour first assignment will follow shortly.\n\nServe with discipline. Maintain order.\n\nCIVIL HARMONY",
+  "quality": 0.75,
+  "CH_Logo": true,
+  "seed": 164
+}

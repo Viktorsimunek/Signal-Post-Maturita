@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e60e65ceede0344d81abefbe9bc3727, type: 3}
   m_Name: PixelizationVolumeComponent
   m_EditorClassIdentifier: Assembly-CSharp::PixelizationVolumeComponent
-  active: 1
+  active: 0
   intensity:
     m_OverrideState: 1
     m_Value: 0.323
