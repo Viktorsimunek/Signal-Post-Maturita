@@ -41,6 +41,7 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float idleBreathFrequency = 0.9f;
 
     private CharacterController characterController;
+    private ChairContactPush chairContactPush;
     private InputAction crouchAction;
     private InputAction fallbackCrouchAction;
     private Vector3 planarVelocity;
@@ -169,6 +170,7 @@ public class FirstPersonController : MonoBehaviour
         GameSettings.EnsureLoaded();
 
         characterController = GetComponent<CharacterController>();
+        chairContactPush = GetComponent<ChairContactPush>();
         crouchAction = ResolveCrouchAction();
         standingControllerHeight = characterController.height;
         standingControllerCenter = characterController.center;
@@ -362,7 +364,15 @@ public class FirstPersonController : MonoBehaviour
         }
 
         Vector3 motion = planarVelocity + (Vector3.up * verticalVelocity);
-        characterController.Move(motion * Time.deltaTime);
+        chairContactPush?.BeginMove(planarVelocity);
+        try
+        {
+            characterController.Move(motion * Time.deltaTime);
+        }
+        finally
+        {
+            chairContactPush?.EndMove();
+        }
     }
 
     private Vector2 ReadMoveInput()
