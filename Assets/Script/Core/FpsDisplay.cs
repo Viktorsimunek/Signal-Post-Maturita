@@ -110,7 +110,7 @@ public class FpsDisplay : MonoBehaviour
         }
 
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = short.MaxValue;
+        canvas.sortingOrder = short.MaxValue - 2;
 
         CanvasScaler scaler = gameObject.GetComponent<CanvasScaler>();
         if (scaler == null)

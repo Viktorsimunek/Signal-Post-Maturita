@@ -9,6 +9,38 @@ public class PaperLook : MonoBehaviour
     [SerializeField] private Vector3 focusPointOffset = new Vector3(0f, 0f, -0.6f);
 
     private LookFocus lookFocus;
+    private FaxMessage message;
+    private FaxReadUI readUI;
+
+    public void SetupReading(FaxMessage fax, FaxReadUI ui)
+    {
+        message = fax;
+        readUI = ui;
+    }
+
+    private void OnEnable()
+    {
+        if (lookFocus == null) lookFocus = GetComponent<LookFocus>();
+        lookFocus.FocusStarted += ShowText;
+        lookFocus.FocusEnded += HideText;
+    }
+
+    private void OnDisable()
+    {
+        lookFocus.FocusStarted -= ShowText;
+        lookFocus.FocusEnded -= HideText;
+        HideText();
+    }
+
+    private void ShowText()
+    {
+        if (readUI != null) readUI.Show(message, lookFocus);
+    }
+
+    private void HideText()
+    {
+        if (readUI != null && message != null && !string.IsNullOrWhiteSpace(message.body)) readUI.Hide();
+    }
 
     private void Awake()
     {

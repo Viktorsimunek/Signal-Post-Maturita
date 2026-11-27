@@ -34,6 +34,7 @@ public class LookFocus : MonoBehaviour, IInteractable
     private bool oldCursorStateManaged;
     private bool isUsing;
     private bool moving;
+    private string actionHint;
 
     public event Action FocusStarted;
     public event Action FocusEnded;
@@ -75,6 +76,12 @@ public class LookFocus : MonoBehaviour, IInteractable
         focusPoint = point;
     }
 
+    public void SetActionHint(string text)
+    {
+        actionHint = text;
+        UpdateFocusedPrompt();
+    }
+
     public void SetPrompt(string text)
     {
         prompt = text;
@@ -103,10 +110,10 @@ public class LookFocus : MonoBehaviour, IInteractable
 
         UpdateFocusedPrompt();
 
-        bool keyboardExit = Keyboard.current != null &&
-            (Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.escapeKey.wasPressedThisFrame);
-        bool gamepadExit = Gamepad.current != null &&
-            (Gamepad.current.buttonNorth.wasPressedThisFrame || Gamepad.current.buttonEast.wasPressedThisFrame);
+        bool keyboardExit = GameSettings.AllowsKeyboardMouseInput() && Keyboard.current != null &&
+            (GameSettings.WasKeyboardBindingPressed(GameSettings.RebindableAction.Interact) || Keyboard.current.escapeKey.wasPressedThisFrame);
+        bool gamepadExit = GameSettings.AllowsGamepadInput() && Gamepad.current != null &&
+            (GameSettings.WasGamepadBindingPressed(GameSettings.RebindableAction.Interact) || Gamepad.current.buttonEast.wasPressedThisFrame);
 
         if (keyboardExit || gamepadExit)
         {
@@ -203,7 +210,9 @@ public class LookFocus : MonoBehaviour, IInteractable
         }
 
         string exitDisplay = InputPromptDisplay.GetExitDisplay(interactor, interactor);
-        interactionHud.SetActionHint(this, string.Format(focusedPromptFormat, exitDisplay));
+        string hint = string.Format(focusedPromptFormat, exitDisplay);
+        if (!string.IsNullOrEmpty(actionHint)) hint = actionHint + "\n" + hint;
+        interactionHud.SetActionHint(this, hint);
     }
 
     private void ClearFocusedPrompt()

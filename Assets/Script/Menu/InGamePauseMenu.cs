@@ -33,6 +33,7 @@ public class InGamePauseMenu : MonoBehaviour
     [Header("Input")]
     [SerializeField, Range(0.01f, 0.2f)] private float volumeStep = 0.05f;
     [SerializeField, Range(0.05f, 0.25f)] private float renderScaleStep = 0.05f;
+    [SerializeField, Range(0.01f, 0.2f)] private float brightnessStep = 0.05f;
     [SerializeField, Range(0.1f, 0.6f)] private float holdRepeatDelay = 0.32f;
     [SerializeField, Range(0.03f, 0.2f)] private float holdRepeatInterval = 0.08f;
 
@@ -65,6 +66,7 @@ public class InGamePauseMenu : MonoBehaviour
         "FPS LIMIT",
         "GRAPHICS QUALITY",
         "RENDER SCALE",
+        "BRIGHTNESS",
         "FPS DISPLAY",
         "MAIN MENU",
         "QUIT"
@@ -510,6 +512,14 @@ public class InGamePauseMenu : MonoBehaviour
             return;
         }
 
+        if (selectedItem == "BRIGHTNESS")
+        {
+            GameSettings.SetBrightness(GameSettings.Brightness + direction * brightnessStep);
+            if (playCursorSfx) PlaySfx(cursorBeep);
+            CommitSettings();
+            return;
+        }
+
         if (selectedItem == "FPS DISPLAY")
         {
             GameSettings.SetShowFpsDisplay(!GameSettings.ShowFpsDisplay);
@@ -632,6 +642,8 @@ public class InGamePauseMenu : MonoBehaviour
                 return "QUALITY: " + GameSettings.GetGraphicsQualityLabel();
             case "RENDER SCALE":
                 return "RENDER SCALE: " + FormatPercent(GameSettings.RenderScale);
+            case "BRIGHTNESS":
+                return GameSettings.GetBrightnessLabel(true);
             case "FPS DISPLAY":
                 return "FPS DISPLAY: " + (GameSettings.ShowFpsDisplay ? "ON" : "OFF");
             default:

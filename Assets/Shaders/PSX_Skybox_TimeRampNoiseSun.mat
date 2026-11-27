@@ -58,14 +58,14 @@ Material:
     - _DitherEnabled: 0
     - _DitherSize: 1
     - _Exposure: 1.8
-    - _FogSkyAmount: 0.914
+    - _FogSkyAmount: 1
     - _FogSkyBias: -0.405
     - _FogSkyBottomHeight: 0.016
     - _FogSkyHeight: 1
     - _FogSkyHorizonBoost: 1
     - _FogSkyNoiseAmount: 0.006
     - _FogSkyPower: 0
-    - _FogSkySoftness: 0.044
+    - _FogSkySoftness: 0.07
     - _FogSkyTopAmount: 0.05
     - _FogSkyTopHeight: 0
     - _Lightning: 1

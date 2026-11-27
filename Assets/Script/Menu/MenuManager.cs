@@ -2,8 +2,6 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 public partial class MenuManager : MonoBehaviour
 {
@@ -97,13 +95,11 @@ public partial class MenuManager : MonoBehaviour
         GameSettings.RebindableAction.Interact,
         GameSettings.RebindableAction.Flashlight,
         GameSettings.RebindableAction.Crouch,
-        GameSettings.RebindableAction.Sprint
+        GameSettings.RebindableAction.Sprint,
+        GameSettings.RebindableAction.ReadFax
     };
 
     private Resolution[] availableResolutions;
-    private Volume runtimeVolume;
-    private VolumeProfile runtimeVolumeProfile;
-    private ColorAdjustments colorAdjustments;
 
     private TerminalScreen currentScreen = TerminalScreen.Splash;
     private int selectedIndex;
@@ -131,8 +127,6 @@ public partial class MenuManager : MonoBehaviour
         CacheAvailableResolutions();
         ApplyMixerVolumes();
         StartMenuMusic();
-        SetupBrightnessControl();
-        ApplyBrightness();
         FpsDisplay.EnsureExists(fpsDisplayFont, fpsDisplayFontSize, fpsDisplayColor);
         lastInputTime = Time.unscaledTime;
         PrepareIntroVisualState();

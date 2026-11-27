@@ -1,8 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 public partial class MenuManager
 {
@@ -17,7 +15,7 @@ public partial class MenuManager
             "RESOLUTION: " + FormatResolution(),
             "GRAPHICS QUALITY: " + GameSettings.GetGraphicsQualityLabel(),
             "RENDER SCALE: " + FormatPercent(GameSettings.RenderScale),
-            "BRIGHTNESS: " + FormatPercent(GameSettings.Brightness),
+            GameSettings.GetBrightnessLabel(),
             "INPUT MODE: " + GameSettings.GetInputModeLabel(),
             "INPUT BINDINGS",
             "INVERT Y: " + (GameSettings.InvertY ? "ON" : "OFF"),
@@ -47,6 +45,7 @@ public partial class MenuManager
             "FLASHLIGHT: " + GameSettings.GetBindingDisplay(GameSettings.RebindableAction.Flashlight),
             "CROUCH: " + GameSettings.GetBindingDisplay(GameSettings.RebindableAction.Crouch),
             "SPRINT: " + GameSettings.GetBindingDisplay(GameSettings.RebindableAction.Sprint),
+            "READ FAX: " + GameSettings.GetBindingDisplay(GameSettings.RebindableAction.ReadFax),
             "RESET DEFAULTS",
             "BACK"
         };
@@ -233,6 +232,7 @@ public partial class MenuManager
             GameSettings.RebindableAction.Flashlight => "FLASHLIGHT",
             GameSettings.RebindableAction.Crouch => "CROUCH",
             GameSettings.RebindableAction.Sprint => "SPRINT",
+            GameSettings.RebindableAction.ReadFax => "READ FAX",
             _ => "INTERACTION"
         };
     }
@@ -332,7 +332,6 @@ public partial class MenuManager
         GameSettings.ApplyRuntime();
         ApplyMixerVolumes();
         ApplyMenuMusicVolume();
-        ApplyBrightness();
         RenderCurrentMenu();
         ShowEventMessage(feedback, 1.3f);
         StartBlinkEffect();
@@ -475,42 +474,6 @@ public partial class MenuManager
 
         int nextIndex = (currentIndex + direction + fpsLimitOptions.Length) % fpsLimitOptions.Length;
         GameSettings.SetFpsLimit(fpsLimitOptions[nextIndex]);
-    }
-
-    private void SetupBrightnessControl()
-    {
-        runtimeVolume = FindObjectOfType<Volume>();
-        if (runtimeVolume == null)
-        {
-            return;
-        }
-
-        VolumeProfile sourceProfile = runtimeVolume.sharedProfile != null ? runtimeVolume.sharedProfile : runtimeVolume.profile;
-        if (sourceProfile == null)
-        {
-            return;
-        }
-
-        runtimeVolumeProfile = Instantiate(sourceProfile);
-        runtimeVolume.profile = runtimeVolumeProfile;
-
-        if (!runtimeVolumeProfile.TryGet(out colorAdjustments))
-        {
-            colorAdjustments = runtimeVolumeProfile.Add<ColorAdjustments>(true);
-        }
-
-        colorAdjustments.active = true;
-        colorAdjustments.postExposure.overrideState = true;
-    }
-
-    private void ApplyBrightness()
-    {
-        if (colorAdjustments == null)
-        {
-            return;
-        }
-
-        colorAdjustments.postExposure.value = Mathf.Lerp(-1f, 1f, GameSettings.Brightness);
     }
 
 }

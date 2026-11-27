@@ -42,6 +42,7 @@ public static class GameSettings
     private const float MaxMouseSensitivity = 2f;
     private const float MinGamepadSensitivity = 0.15f;
     private const float MaxGamepadSensitivity = 2f;
+    private const float DefaultRenderScale = 1f;
     private const float MinRenderScale = 0.25f;
     private const float MaxRenderScale = 1f;
 
@@ -68,7 +69,8 @@ public static class GameSettings
         Interact = 0,
         Flashlight = 1,
         Crouch = 2,
-        Sprint = 3
+        Sprint = 3,
+        ReadFax = 4
     }
 
     public static float MasterVolume { get; private set; }
@@ -92,10 +94,12 @@ public static class GameSettings
     private static Key flashlightKey = Key.F;
     private static Key crouchKey = Key.LeftCtrl;
     private static Key sprintKey = Key.LeftShift;
+    private static Key readFaxKey = Key.Space;
     private static GamepadButton interactButton = GamepadButton.North;
     private static GamepadButton flashlightButton = GamepadButton.RightShoulder;
     private static GamepadButton crouchButton = GamepadButton.East;
     private static GamepadButton sprintButton = GamepadButton.LeftStick;
+    private static GamepadButton readFaxButton = GamepadButton.West;
     private static bool isLoaded;
 
     public static void EnsureLoaded()
@@ -120,9 +124,7 @@ public static class GameSettings
         ResolutionHeight = Mathf.Max(360, PlayerPrefs.GetInt(ResolutionHeightKey, currentResolution.height));
         int quality = PlayerPrefs.GetInt(GraphicsQualityKey, (int)GraphicsQuality.High);
         CurrentGraphicsQuality = (GraphicsQuality)Mathf.Clamp(quality, 0, 4);
-        int outputHeight = CurrentDisplayMode == DisplayMode.BorderlessFullscreen ? currentResolution.height : ResolutionHeight;
-        RenderScale = ClampRenderScale(PlayerPrefs.GetFloat(RenderScaleKey,
-            GraphicsQualityPresets.SuggestedRenderScale(CurrentGraphicsQuality, outputHeight)));
+        RenderScale = ClampRenderScale(PlayerPrefs.GetFloat(RenderScaleKey, DefaultRenderScale));
         Brightness = Mathf.Clamp01(PlayerPrefs.GetFloat(BrightnessKey, DefaultBrightness));
         MouseSensitivity = Mathf.Clamp(PlayerPrefs.GetFloat(MouseSensitivityKey, DefaultMouseSensitivity), MinMouseSensitivity, MaxMouseSensitivity);
         GamepadSensitivity = Mathf.Clamp(PlayerPrefs.GetFloat(GamepadSensitivityKey, DefaultGamepadSensitivity), MinGamepadSensitivity, MaxGamepadSensitivity);
@@ -225,9 +227,6 @@ public static class GameSettings
     public static void SetGraphicsQuality(GraphicsQuality quality)
     {
         CurrentGraphicsQuality = (GraphicsQuality)Mathf.Clamp((int)quality, 0, 4);
-        int outputHeight = CurrentDisplayMode == DisplayMode.BorderlessFullscreen
-            ? Screen.currentResolution.height : ResolutionHeight;
-        RenderScale = GraphicsQualityPresets.SuggestedRenderScale(CurrentGraphicsQuality, outputHeight);
         NotifyChanged();
     }
 
@@ -235,6 +234,13 @@ public static class GameSettings
     {
         if (direction == 0) return;
         SetGraphicsQuality((GraphicsQuality)(((int)CurrentGraphicsQuality + (direction > 0 ? 1 : -1) + 5) % 5));
+    }
+
+    public static string GetBrightnessLabel(bool compact = false)
+    {
+        char[] bar = (compact ? "-----" : "-----------").ToCharArray();
+        bar[Mathf.Clamp(Mathf.RoundToInt(Brightness * (bar.Length - 1)), 0, bar.Length - 1)] = 'O';
+        return (compact ? "BRIGHT: [" : "BRIGHTNESS: [") + new string(bar) + "] " + Mathf.RoundToInt(Brightness * 100f) + "%";
     }
 
     public static void SetBrightness(float value)
@@ -302,7 +308,7 @@ public static class GameSettings
         ResolutionWidth = currentResolution.width;
         ResolutionHeight = currentResolution.height;
         CurrentGraphicsQuality = GraphicsQuality.High;
-        RenderScale = GraphicsQualityPresets.SuggestedRenderScale(CurrentGraphicsQuality, currentResolution.height);
+        RenderScale = DefaultRenderScale;
         Brightness = DefaultBrightness;
         MouseSensitivity = DefaultMouseSensitivity;
         GamepadSensitivity = DefaultGamepadSensitivity;
@@ -351,6 +357,7 @@ public static class GameSettings
             RebindableAction.Flashlight => flashlightKey,
             RebindableAction.Crouch => crouchKey,
             RebindableAction.Sprint => sprintKey,
+            RebindableAction.ReadFax => readFaxKey,
             _ => interactKey
         };
     }
@@ -362,6 +369,7 @@ public static class GameSettings
             RebindableAction.Flashlight => flashlightButton,
             RebindableAction.Crouch => crouchButton,
             RebindableAction.Sprint => sprintButton,
+            RebindableAction.ReadFax => readFaxButton,
             _ => interactButton
         };
     }
@@ -384,6 +392,9 @@ public static class GameSettings
             case RebindableAction.Sprint:
                 sprintKey = key;
                 break;
+            case RebindableAction.ReadFax:
+                readFaxKey = key;
+                break;
             default:
                 interactKey = key;
                 break;
@@ -404,6 +415,9 @@ public static class GameSettings
                 break;
             case RebindableAction.Sprint:
                 sprintButton = button;
+                break;
+            case RebindableAction.ReadFax:
+                readFaxButton = button;
                 break;
             default:
                 interactButton = button;
@@ -445,10 +459,12 @@ public static class GameSettings
         flashlightKey = Key.F;
         crouchKey = Key.LeftCtrl;
         sprintKey = Key.LeftShift;
+        readFaxKey = Key.Space;
         interactButton = GamepadButton.North;
         flashlightButton = GamepadButton.RightShoulder;
         crouchButton = GamepadButton.East;
         sprintButton = GamepadButton.LeftStick;
+        readFaxButton = GamepadButton.West;
 
         if (notify)
         {
@@ -497,10 +513,12 @@ public static class GameSettings
         flashlightKey = LoadKey(RebindableAction.Flashlight, Key.F);
         crouchKey = LoadKey(RebindableAction.Crouch, Key.LeftCtrl);
         sprintKey = LoadKey(RebindableAction.Sprint, Key.LeftShift);
+        readFaxKey = LoadKey(RebindableAction.ReadFax, Key.Space);
         interactButton = LoadButton(RebindableAction.Interact, GamepadButton.North);
         flashlightButton = LoadButton(RebindableAction.Flashlight, GamepadButton.RightShoulder);
         crouchButton = LoadButton(RebindableAction.Crouch, GamepadButton.East);
         sprintButton = LoadButton(RebindableAction.Sprint, GamepadButton.LeftStick);
+        readFaxButton = LoadButton(RebindableAction.ReadFax, GamepadButton.West);
     }
 
     private static void SaveInputBindings()
@@ -509,6 +527,7 @@ public static class GameSettings
         SaveBinding(RebindableAction.Flashlight);
         SaveBinding(RebindableAction.Crouch);
         SaveBinding(RebindableAction.Sprint);
+        SaveBinding(RebindableAction.ReadFax);
     }
 
     private static Key LoadKey(RebindableAction action, Key fallback)

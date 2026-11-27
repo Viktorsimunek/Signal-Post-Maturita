@@ -23,6 +23,7 @@ Shader "Hidden/TerrainEngine/BillboardTree"
             #include "UnityCG.cginc"
             #include "TerrainEngine.cginc"
             Texture2D _MainTex;
+            float _SignalPostTreeDrawDistance;
             // Inline sampler keeps fractional mip transitions smooth on the generated atlas.
             SamplerState sampler_TreeAtlas_trilinear_clamp;
             struct BillboardVaryings
@@ -44,9 +45,11 @@ Shader "Hidden/TerrainEngine/BillboardTree"
                 float3 rootWS = mul(unity_ObjectToWorld, input.vertex).xyz;
                 float rootDistance = distance(rootWS, _WorldSpaceCameraPos);
                 float treeVariation = frac(sin(dot(rootWS.xz, float2(12.9898, 78.233))) * 43758.5453);
-                float fadeEnd = lerp(550.0, 620.0, treeVariation);
-                output.distanceFade = 1.0 - smoothstep(260.0, fadeEnd, rootDistance);
-                output.haze = smoothstep(180.0, 620.0, rootDistance) * 0.45;
+                // Zero is the edit-mode fallback. Runtime follows the selected terrain budget.
+                float drawDistance = _SignalPostTreeDrawDistance > 0.0 ? _SignalPostTreeDrawDistance : 650.0;
+                float fadeEnd = drawDistance * lerp(0.85, 0.96, treeVariation);
+                output.distanceFade = 1.0 - smoothstep(drawDistance * 0.40, fadeEnd, rootDistance);
+                output.haze = smoothstep(drawDistance * 0.28, fadeEnd, rootDistance) * 0.45;
                 TerrainBillboardTree(input.vertex, input.texcoord1.xy, input.texcoord.y);
                 output.positionCS = UnityObjectToClipPos(input.vertex);
                 output.uv = float2(input.texcoord.x, input.texcoord.y > 0.0);

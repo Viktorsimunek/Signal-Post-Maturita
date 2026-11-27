@@ -334,7 +334,7 @@ public class FaxRenderer : MonoBehaviour
         };
     }
 
-    protected static string ResolveText(string text)
+    public static string ResolveText(string text)
     {
         return (text ?? string.Empty).Replace("{PLAYER_NAME}", PlayerProfile.PlayerName)
             .Replace("\\n", "\n").Replace("**", string.Empty);

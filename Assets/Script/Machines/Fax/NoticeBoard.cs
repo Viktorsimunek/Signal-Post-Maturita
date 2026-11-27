@@ -13,6 +13,7 @@ public class NoticeBoard : MonoBehaviour
     [SerializeField] private string textureFolder = "Faxes/";
 
     [SerializeField] private FaxRenderer faxRenderer;
+    [SerializeField] private FaxReadUI faxReadUI;
 
     [Header("Sound")]
     [SerializeField] private AudioSource audioSource;
@@ -106,6 +107,9 @@ public class NoticeBoard : MonoBehaviour
         if (message.texture == null && !string.IsNullOrWhiteSpace(message.body) && faxRenderer != null)
             faxRenderer.Generate(message);
         ApplyTexture(paper, message.texture);
+        var paperLook = paper.GetComponent<PaperLook>();
+        if (paperLook == null) paperLook = paper.AddComponent<PaperLook>();
+        paperLook.SetupReading(message, faxReadUI);
         return paper;
     }
 

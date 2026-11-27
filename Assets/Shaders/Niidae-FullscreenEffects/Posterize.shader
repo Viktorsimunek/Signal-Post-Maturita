@@ -69,7 +69,9 @@ Shader "Hidden/Custom/URP/PosterizeVolume"
 
                 half3 newColor = floor(color.rgb * _NumColors + _ColorOffset + DitherValue(resolutionUv)) / _NumColors;
 
-                newColor = lerp(color.rgb, newColor.rgb, _Intensity);
+                half signal = max(color.r, max(color.g, color.b));
+                half shadowProtection = smoothstep(0.0h, 3.0h / max(_NumColors, 2.0), signal);
+                newColor = lerp(color.rgb, max(newColor.rgb, 0.0h), _Intensity * shadowProtection);
                 return half4(newColor, color.a);
             }
             ENDHLSL

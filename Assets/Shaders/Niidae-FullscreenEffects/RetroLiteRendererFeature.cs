@@ -49,6 +49,7 @@ public sealed class RetroLiteRendererFeature : ScriptableRendererFeature
         private static readonly int PosterId = Shader.PropertyToID("_RetroPoster");
         private static readonly int ScanId = Shader.PropertyToID("_RetroScan");
         private static readonly int GradeId = Shader.PropertyToID("_RetroGrade");
+        private static readonly int GhostId = Shader.PropertyToID("_RetroGhost");
         private static readonly int TimeId = Shader.PropertyToID("_RetroTime");
         private static readonly int SourceId = Shader.PropertyToID("_BlitTexture");
         private static readonly int ScaleId = Shader.PropertyToID("_BlitScaleBias");
@@ -57,7 +58,7 @@ public sealed class RetroLiteRendererFeature : ScriptableRendererFeature
         {
             public Material material;
             public TextureHandle source;
-            public Vector4 pixel, poster, scan, grade;
+            public Vector4 pixel, poster, scan, grade, ghost;
             public float time;
             public MaterialPropertyBlock properties;
         }
@@ -81,15 +82,22 @@ public sealed class RetroLiteRendererFeature : ScriptableRendererFeature
             var pixel = stack.GetComponent<PixelizationVolumeComponent>();
             var poster = stack.GetComponent<PosterizeVolumeComponent>();
             var scan = stack.GetComponent<ScanlinesVolumeComponent>();
-            if (!HasOverride(pixel) && !HasOverride(poster) && !HasOverride(scan)) return;
+            var ghost = stack.GetComponent<VHSGhostingVolumeComponent>();
+            // Inactive profile components leave active default instances in the Volume stack.
+            // Defaults (notably pixel intensity 1 / size 4) must never enable an unused effect.
+            bool pixelActive = HasOverride(pixel) && pixel.IsActive();
+            bool posterActive = HasOverride(poster) && poster.IsActive();
+            bool scanActive = HasOverride(scan) && scan.IsActive();
+            bool ghostActive = HasOverride(ghost) && ghost.IsActive();
+            if (!pixelActive && !posterActive && !scanActive && !ghostActive) return;
             var desc = graph.GetTextureDesc(resources.cameraColor);
-            Vector4 p = new Vector4(pixel != null && pixel.active && pixel.IsActive() ? pixel.intensity.value : 0,
-                pixel != null ? pixel.pixelSize.value : 1, desc.width, desc.height);
-            Vector4 q = new Vector4(poster != null && poster.active && poster.IsActive() ? poster.intensity.value : 0,
+            Vector4 p = new Vector4(pixelActive ? pixel.intensity.value : 0,
+                pixelActive ? pixel.pixelSize.value : 1, desc.width, desc.height);
+            Vector4 q = new Vector4(posterActive ? poster.intensity.value : 0,
                 poster != null ? poster.numColors.value : 73, poster != null ? poster.colorOffset.value : 0,
-                poster != null ? poster.ditherStrength.value : 0);
+                posterActive ? poster.ditherStrength.value : 0);
             Vector4 s = new Vector4(poster != null ? poster.ditherScale.value : 1,
-                scan != null && scan.active && scan.IsActive() ? scan.strength.value : 0,
+                scanActive ? scan.strength.value : 0,
                 scan != null ? scan.frequency.value : 0, scan != null ? scan.dispersion.value : 0);
             desc.name = "_SignalPostRetroLite";
             desc.clearBuffer = false;
@@ -101,6 +109,7 @@ public sealed class RetroLiteRendererFeature : ScriptableRendererFeature
                 data.material = material;
                 data.source = resources.cameraColor;
                 data.pixel = p; data.poster = q; data.scan = s; data.grade = grade;
+                data.ghost = ghostActive ? new Vector4(ghost.strength.value, ghost.xOffset.value, 0, 0) : Vector4.zero;
                 data.time = Time.unscaledTime;
                 data.properties = properties;
                 builder.UseTexture(data.source, AccessFlags.Read);
@@ -114,6 +123,7 @@ public sealed class RetroLiteRendererFeature : ScriptableRendererFeature
                     properties.SetVector(PosterId, data.poster);
                     properties.SetVector(ScanId, data.scan);
                     properties.SetVector(GradeId, data.grade);
+                    properties.SetVector(GhostId, data.ghost);
                     properties.SetFloat(TimeId, data.time);
                     context.cmd.DrawProcedural(Matrix4x4.identity, data.material, 0, MeshTopology.Triangles, 3, 1, properties);
                 });

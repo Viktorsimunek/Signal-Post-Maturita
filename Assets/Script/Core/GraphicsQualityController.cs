@@ -15,11 +15,12 @@ public sealed class GraphicsQualityController : MonoBehaviour
     private Terrain[] terrains = System.Array.Empty<Terrain>();
     private Lights[] fixtures = System.Array.Empty<Lights>();
     private float originalLodBias;
+    private static readonly int TreeDrawDistanceId = Shader.PropertyToID("_SignalPostTreeDrawDistance");
+    private float originalTreeDrawDistance;
     private bool shuttingDown;
     private readonly HashSet<Camera> monitorCameras = new HashSet<Camera>();
     private UniversalRenderPipelineAsset monitorScalePipeline;
     private Camera monitorScaleCamera;
-    private float monitorPreviousScale;
     private bool originalVeryLowKeyword, originalLowKeyword;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -46,6 +47,7 @@ public sealed class GraphicsQualityController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         originalPipeline = QualitySettings.renderPipeline;
         originalLodBias = QualitySettings.lodBias;
+        originalTreeDrawDistance = Shader.GetGlobalFloat(TreeDrawDistanceId);
         originalVeryLowKeyword = Shader.IsKeywordEnabled("SIGNALPOST_CRT_VERY_LOW");
         originalLowKeyword = Shader.IsKeywordEnabled("SIGNALPOST_CRT_LOW");
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -111,6 +113,8 @@ public sealed class GraphicsQualityController : MonoBehaviour
     {
         var p = GraphicsQualityPresets.Current;
         QualitySettings.lodBias = p.LodBias;
+        // Finish the billboard fade before Unity culls trees at this preset's distance.
+        Shader.SetGlobalFloat(TreeDrawDistanceId, p.TreeDistance);
         foreach (var t in terrains)
         {
             if (t == null) continue;
@@ -194,10 +198,18 @@ public sealed class GraphicsQualityController : MonoBehaviour
     private void BeginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         // Never switch a renderer here: URP already selected its frame-data context before this callback.
-        if (runtimePipeline == null || camera.targetTexture == null || camera.cullingMask != (1 << 5)) return;
+        if (runtimePipeline == null) return;
+        if (camera.targetTexture == null)
+        {
+            // The player output always follows the user's scale, independently of the preset
+            // and any offscreen monitor camera rendered earlier in the frame.
+            RestoreMonitorScale();
+            runtimePipeline.renderScale = GameSettings.RenderScale;
+            return;
+        }
+        if (camera.cullingMask != (1 << 5)) return;
         monitorScalePipeline = runtimePipeline;
         monitorScaleCamera = camera;
-        monitorPreviousScale = runtimePipeline.renderScale;
         runtimePipeline.renderScale = 1f;
     }
 
@@ -209,7 +221,7 @@ public sealed class GraphicsQualityController : MonoBehaviour
 
     private void RestoreMonitorScale()
     {
-        if (monitorScalePipeline != null) monitorScalePipeline.renderScale = monitorPreviousScale;
+        if (monitorScalePipeline != null) monitorScalePipeline.renderScale = GameSettings.RenderScale;
         monitorScalePipeline = null;
         monitorScaleCamera = null;
     }
@@ -235,6 +247,7 @@ public sealed class GraphicsQualityController : MonoBehaviour
         if (QualitySettings.renderPipeline == runtimePipeline)
             QualitySettings.renderPipeline = originalPipeline;
         QualitySettings.lodBias = originalLodBias;
+        Shader.SetGlobalFloat(TreeDrawDistanceId, originalTreeDrawDistance);
         if (runtimePipeline != null) Destroy(runtimePipeline);
         instance = null;
     }

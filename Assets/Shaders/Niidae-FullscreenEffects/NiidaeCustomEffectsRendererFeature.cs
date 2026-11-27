@@ -426,7 +426,7 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
             if (quality == GameSettings.GraphicsQuality.VeryLow &&
                 effect != EffectType.Posterize && effect != EffectType.Pixelization && effect != EffectType.Scanlines)
                 return false;
-            if (quality <= GameSettings.GraphicsQuality.Medium && effect == EffectType.VHSGhosting)
+            if (quality <= GameSettings.GraphicsQuality.Low && effect == EffectType.VHSGhosting)
                 return false;
         }
         switch (effect)
@@ -1046,7 +1046,9 @@ public sealed class NiidaeCustomEffectsRendererFeature : ScriptableRendererFeatu
                         shaderPass: 0,
                         mode: PassMode.VHSGhosting,
                         passName: "Niidae Combined VHS Ghosting",
-                        p0: new Vector4(vhsGhosting.strength.value, vhsGhosting.xOffset.value, vhsGhosting.radius.value, 0f),
+                        p0: new Vector4(vhsGhosting.strength.value, vhsGhosting.xOffset.value,
+                            Application.isPlaying && GameSettings.CurrentGraphicsQuality == GameSettings.GraphicsQuality.Medium
+                                ? Mathf.Min(1, vhsGhosting.radius.value) : vhsGhosting.radius.value, 0f),
                         p1: Vector4.zero,
                         p2: Vector4.zero);
                     break;

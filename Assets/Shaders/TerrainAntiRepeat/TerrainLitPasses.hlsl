@@ -248,7 +248,7 @@ void HeightBasedSplatModify(inout half4 splatControl, in half4 masks[4])
 }
 #endif
 
-void SplatmapFinalColor(inout half4 color, half fogCoord)
+void SplatmapFinalColor(inout half4 color, half fogCoord, float3 positionWS)
 {
     color.rgb *= color.a;
 
@@ -258,6 +258,18 @@ void SplatmapFinalColor(inout half4 color, half fogCoord)
         color.rgb = MixFogColor(color.rgb, half3(0,0,0), fogCoord);
     #else
         color.rgb = MixFog(color.rgb, fogCoord);
+    #endif
+
+    #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
+        // Fully merge into the sky haze before the camera cuts terrain geometry.
+        // View depth follows the clipping plane even at the edges of a wide FOV.
+        float viewDepth = -TransformWorldToView(positionWS).z;
+        half horizon = smoothstep(_ProjectionParams.z * 0.60, _ProjectionParams.z * 0.94, viewDepth);
+        #ifdef TERRAIN_SPLAT_ADDPASS
+            color.rgb *= 1.0h - horizon;
+        #else
+            color.rgb = lerp(color.rgb, unity_FogColor.rgb, horizon);
+        #endif
     #endif
 
     #endif
@@ -481,7 +493,7 @@ void SplatmapFragment(
     color.rgb = GlobalIllumination(brdfData, (BRDFData)0, 0, inputData.bakedGI, occlusion, inputData.positionWS,
                                    inputData.normalWS, inputData.viewDirectionWS, inputData.normalizedScreenSpaceUV);
     color.a = alpha;
-    SplatmapFinalColor(color, inputData.fogCoord);
+    SplatmapFinalColor(color, inputData.fogCoord, inputData.positionWS);
 
     // Dynamic lighting: emulate SplatmapFinalColor() by scaling gbuffer material properties. This will not give the same results
     // as forward renderer because we apply blending pre-lighting instead of post-lighting.
@@ -498,7 +510,7 @@ void SplatmapFragment(
 
     half4 color = UniversalFragmentPBR(inputData, albedo, metallic, /* specular */ half3(0.0h, 0.0h, 0.0h), smoothness, occlusion, /* emission */ half3(0, 0, 0), alpha);
 
-    SplatmapFinalColor(color, inputData.fogCoord);
+    SplatmapFinalColor(color, inputData.fogCoord, inputData.positionWS);
 
     outColor = half4(color.rgb, 1.0h);
 
